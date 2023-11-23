@@ -1,7 +1,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
-#include"test.h"
+#include"treefunc.h"
 static void operate(node*p,void(*func)(item*a,int*b));
 static void deltree(node*p);
 static int cmp(item a,item b);
@@ -66,7 +66,6 @@ int add(tree* input,item target)
             }
         }
         (*p2)=p1;
-        return 1;
     }
     input->curnum++;
     return 1;
@@ -87,12 +86,10 @@ static int delnode(node**chi)
     {
         p1=(*chi)->right;
         p2=&((*chi)->left);
-        while(p2!=NULL)
+        while((*p2)!=NULL)
         {
-            p=*p2;
             p2=&((*p2)->right);
         }
-        p2=&p;
         (*p2)->right=p1;
         p=*chi;
         (*chi)=(*chi)->left;
