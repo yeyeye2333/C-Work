@@ -30,6 +30,11 @@ static int cmp(item a,item b)
 //增加item
 int add(tree* input,item target)
 {
+    if(input->curnum>=maxcu)
+    {
+        printf("content is full\n");
+        return 0;
+    }
     node *p1,**p2;
     if(input->head==NULL)
     {
@@ -100,23 +105,23 @@ static int delnode(node**chi)
 //删除item
 int del(tree *input,item target)
 {
-    node*p2;
+    node**p2;
     if(isempty(input))return 0;
-    p2=input->head;
+    p2=&(input->head);
     int tem;
     while(p2!=NULL)
     {
-        if((tem=cmp(p2->content,target))>0)
+        if((tem=cmp((*p2)->content,target))>0)
         {
-            p2=p2->left;
+            p2=&((*p2)->left);
         }
         if(tem<0)
         {
-            p2=p2->right;
+            p2=&((*p2)->right);
         }
         else
         {
-            delnode(&p2);
+            delnode(p2);
             input->curnum--;
             return 1;
         }

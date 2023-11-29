@@ -18,7 +18,7 @@ int main()
     init(&one);
     while(fscanf(ff,"%s",tem.word)==1)
     {
-        add(&one,tem);
+        if(add(&one,tem)==0)break;
     }
     char choice[2];
     do{
@@ -29,7 +29,7 @@ int main()
             traverse(&one,printfile);
         }
     }while(choice[0]=='r');
-    if(choice[0]='q')printf("quit");
+    if(choice[0]='q')printf("quit\n");
     fclose(ff);
     tradel(&one);
     return 0;
