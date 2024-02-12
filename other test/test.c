@@ -1,64 +1,96 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
-int radixsort(char**a,int k,int al,int n);
-int* smallestTrimmedNumbers(char** nums, int numsSize, int** queries, int queriesSize) {
-    int *back=(int *)malloc(sizeof(int)*queriesSize);
-    for(int c=0;c<queriesSize;c++)
-    {
-        back[c]=radixsort(nums,queries[c][0],numsSize,queries[c][1]);
-    }
-    return back;
-}
-int main()
+#include<unistd.h>
+typedef struct node{
+    char cont;
+    struct node*next;
+}st;
+int isempty(st**head)
 {
-    char tem2[4][4]={"102","473","251","814"};
-    char*tem[4]={tem2[0],tem2[1],tem2[2],tem2[3]};
-    char**nums=tem;
-    int tem3[4][2]={1,1,2,3,4,2,1,2};
-    int *tem4[4]={tem3[0],tem3[1],tem3[2],tem3[3]};
-    int **queries=tem4;
-    int *back=smallestTrimmedNumbers(nums,4,queries,4);
-    printf("%d,%d",back[0],back[1]);
-    free(back);
+    if(*head==NULL)return 1;
     return 0;
 }
-int radixsort(char**a,int k,int al,int n)
+void init(st**head)
 {
-    int maxdi=0;
-    while(a[0][maxdi]!='\0')
+    *head=NULL;
+}
+int push(st**head,char ch)
+{
+    st*p;
+    if((p=(st*)malloc(sizeof(st)))==NULL)return 0;
+    p->cont=ch;
+    p->next=(*head);
+    (*head)=p;
+    return 1;
+}
+int pop(st**head)
+{
+    if(isempty(head)==1)return 0;
+    st*p=(*head);
+    (*head)=(*head)->next;
+    free(p);
+    return 1;
+}
+char top(st**head)
+{
+    if(isempty(head)==1)return 0;
+    return (*head)->cont;
+}
+void clear(st**head)
+{
+    while(isempty(head)==0)
     {
-        maxdi++;
+        pop(head);
     }
-    char result[al][maxdi+1];
-    char cpy[al][maxdi+1];//防止原数组被修改
-    for(int c=0;c<al;c++)
-    memcpy(cpy[c],a[c],(maxdi+1)*sizeof(char));
-    int tem[n][al];
-    for(int c=1;c<=n;c++)
+}
+int longestValidParentheses(char* s) {
+    st*stack;
+    init(&stack);
+    int result=0;
+    int tmp=0;
+    for(int c=0;c<=strlen(s);c++)
     {
-        int bucket[10]={0};
-        for(int cc=0;cc<al;cc++)
-            bucket[cpy[cc][maxdi-c]%'0']++;
-        for(int cc=1;cc<10;cc++)
-            bucket[cc]=bucket[cc]+bucket[cc-1];
-        for(int cc=al-1;cc>=0;cc--)
+        if(top(&stack)=='('&&s[c]==')')
         {
-            memcpy(result[bucket[cpy[cc][maxdi-c]%'0']-1],cpy[cc],(maxdi+1)*sizeof(char));
-            tem[c-1][bucket[cpy[cc][maxdi-c]%'0']-1]=cc;
-            bucket[cpy[cc][maxdi-c]%'0']--;
+            pop(&stack);
+            tmp+=2;
         }
-        for(int cc=0;cc<al;cc++)
+        else if(top(&stack)==0&&s[c]=='(')
         {
-            memcpy(cpy[cc],result[cc],maxdi*sizeof(char));
+            push(&stack,s[c]);
+        }
+        else if(top(&stack)==0&&s[c]==')')
+        {
+            push(&stack,s[c]);
+        }
+        else if(top(&stack)==')'&&s[c]=='(')
+        {
+            clear(&stack);
+            result=tmp>result?tmp:result;
+            tmp=0;
+            push(&stack,s[c]);
+        }
+        else if(top(&stack)=='('&&s[c]=='(')
+        {
+            push(&stack,s[c]);
         }
     }
-    int tmp2=k-1;
-    int tmp3;
-    for(int c=n-1;c>=0;c--)
+    if(tmp!=0)result=tmp>result?tmp:result;
+    return result;
+}
+
+int main()
+{
+    char command[1000];
+    printf("\e[32mhhh:\e[0m");
+    while ((fgets(command,1000,fdopen(STDIN_FILENO,"r")))!=NULL)
     {
-        tmp3=tem[c][tmp2];
-        tmp2=tmp3;
+        if(command[0]!='\n')
+        {
+            printf("\n");
+        }
+        printf("\e[32mhhh:\033[2D\033[1D\e[0m\033[2D");
     }
-    return tmp2;
+    return 0;
 }

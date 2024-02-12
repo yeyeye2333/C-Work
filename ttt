@@ -1,0 +1,13 @@
+总计 196
+drwxrwxr-x  8 ubt ubt   4096 Jan 17 23:15 .
+drwxr-x--- 31 ubt ubt   4096 Jan 17 22:57 ..
+drwxrwxr-x  3 ubt ubt   4096 Nov 24 11:11 c practice
+drwxrwxr-x  8 ubt ubt   4096 Nov 29 17:53 .git
+drwxrwxr-x  2 ubt ubt   4096 Jan 15 21:38 linux
+-rwxrwxr-x  1 ubt ubt  39312 Jan 17 23:15 myshell.out
+drwxrwxr-x  3 ubt ubt   4096 Dec 13 22:27 other test
+drwxrwxr-x  2 ubt ubt   4096 Nov 27 17:37 strbuf prac
+-rwxrwxr-x  1 ubt ubt 100504 Dec 18 21:00 test2.out
+-rwxrwxr-x  1 ubt ubt  22256 Jan 17 21:31 test.out
+-rw-rw-r--  1 ubt ubt      0 Jan 17 23:15 ttt
+drwxrwxr-x  2 ubt ubt   4096 Nov 15 22:16 .vscode

@@ -1,6 +1,18 @@
 {
     "files.associations": {
         "stdio.h": "c",
-        "functional": "c"
-    }
+        "functional": "c",
+        "iostream": "cpp",
+        "ostream": "cpp",
+        "array": "c",
+        "compare": "c",
+        "tuple": "c",
+        "type_traits": "c",
+        "utility": "c",
+        "dirent.h": "c",
+        "ftw.h": "c",
+        "limits.h": "c",
+        "signal.h": "c"
+    },
+    "terminal.explorerKind": "external"
 }
