@@ -69,7 +69,7 @@ int main(int argc,char**argv)
     {
         if(lstat(name[c],&test)!=0)
         {
-            printf("无权限/文件不存在:%s\n",name[c]);
+            printf("myls:无权限/文件不存在:%s\n",name[c]);
             continue;
         }
         if(_R==0&&((test.st_mode&__S_IFMT)!=__S_IFDIR))
@@ -79,7 +79,7 @@ int main(int argc,char**argv)
         else if(_R==0)noR(name[c]);
         else if(nftw(name[c],func,20,FTW_PHYS)==-1)
         {
-            printf("nftw错误!!!!!!!!!!!!!!!!!%d",errno);
+            printf("errno:nftw %d",errno);
         }
     }
     return 0;
@@ -125,8 +125,8 @@ void output(char*pathname)
     memcpy(base,basename(pathname),strlen(basename(pathname))+1);
     if(lstat(pathname,&tmp)==-1)
     {
-        if(_l==1)printf("无法打开：'%s':权限不够\n",pathname);
-        else printf("无法打开：'%s':权限不够 \t",pathname);
+        if(_l==1)printf("myls: 无法打开 '%s': 权限不够\n",pathname);
+        else printf("myls: 无法打开 '%s': 权限不够 \t",pathname);
         return ;
     }
     char file[11]={"??????????"};
@@ -285,7 +285,7 @@ int t_cmp(const struct dirent **a, const struct dirent **b)
 int func(const char*pathname,const struct stat*statbuf,int type,struct FTW*ftwbuf)
 {
     if(type==FTW_DNR)printf("myls: 无法打开 '%s': 权限不够\n",pathname);
-    if(type==FTW_NS)printf("%s nsnsNSNS!!!!@@@@@@@@@@@!\n",pathname);
+    if(type==FTW_NS)printf("%s error : ns\n",pathname);
     if(type!=FTW_D)return 0;
     printf("%s:\n",pathname);
     DIR*tmp=opendir(pathname);
