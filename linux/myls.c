@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
@@ -11,13 +12,24 @@
 #ifndef __USE_XOPEN_EXTENDED
 #define __USE_XOPEN_EXTENDED
 #endif
-#define _XOPEN_SOURCE 500
+#ifndef _POSIX_C_SOURCE
+#define _POSIX_C_SOURCE  200809L
+#endif
 #include<unistd.h>
 #include<ftw.h>
 #ifndef __USE_XOPEN2K8
 #define __USE_XOPEN2K8
 #endif
 #include<dirent.h>
+#include<stdbool.h>
+#define _Red \033[31m
+#define _Greed \033[32m
+#define _Yellow \033[33m
+#define _Blue \033[34m
+#define _Magenta \033[35m
+#define _Cyan \033[36m
+#define _White \033[37m
+#define _Reset \033[0m 
 void noR(const char*pathname);
 void output(char*pathname);
 int myselect(const struct dirent *a);
@@ -26,7 +38,7 @@ int r_cmp(const struct dirent **a, const struct dirent **b);
 int t_cmp(const struct dirent **a, const struct dirent **b);
 int rt_cmp(const struct dirent **a, const struct dirent **b);
 int func(const char*pathname,const struct stat*statbuf,int type,struct FTW*ftwbuf);
-static _Bool _a,_l,_R,_t,_r,_i,_s;
+static  bool _a,_l,_R,_t,_r,_i,_s;
 int main(int argc,char**argv)
 {
     int tmp=argc-1;
@@ -64,7 +76,7 @@ int main(int argc,char**argv)
     struct stat test;
     errno=0;
     if(tmp==0&&_R==0)noR(".");
-    else if(tmp==0&&_R==1)nftw(".",func,20,FTW_PHYS);
+    else if(tmp==0&&_R==1)nftw(".",func,20,FTW_PHYS|FTW_ACTIONRETVAL);
     else for(int c=0;c<tmp;c++)
     {
         if(lstat(name[c],&test)!=0)
@@ -79,7 +91,7 @@ int main(int argc,char**argv)
         else if(_R==0)noR(name[c]);
         else if(nftw(name[c],func,20,FTW_PHYS)==-1)
         {
-            printf("errno:nftw %d",errno);
+            printf("error:nftw %d",errno);
         }
     }
     return 0;
@@ -232,7 +244,7 @@ int myselect(const struct dirent *a)
 }
 int r_cmp(const struct dirent **a, const struct dirent **b)
 {
-    int max=strlen((*a)->d_name)>strlen((*b)->d_name)?strlen((*a)->d_name):strlen((*b)->d_name);
+    int max=strlen((*a)->d_name)>strlen((*b)->d_name)?strlen((*b)->d_name):strlen((*a)->d_name);
     char tmp1[strlen((*a)->d_name)+1];
     char tmp2[strlen((*b)->d_name)+1];
     for(int c=0;c<strlen((*a)->d_name);c++)
@@ -286,7 +298,10 @@ int func(const char*pathname,const struct stat*statbuf,int type,struct FTW*ftwbu
 {
     if(type==FTW_DNR)printf("myls: 无法打开 '%s': 权限不够\n",pathname);
     if(type==FTW_NS)printf("%s error : ns\n",pathname);
-    if(type!=FTW_D)return 0;
+    if (_a==0&&pathname[ftwbuf->base]=='.'&&pathname[1]!='\0') {
+        return FTW_SKIP_SUBTREE;//跳过子目录
+    }
+    if(type!=FTW_D)return FTW_CONTINUE;
     printf("%s:\n",pathname);
     DIR*tmp=opendir(pathname);
     struct dirent**all=NULL;
@@ -319,5 +334,5 @@ int func(const char*pathname,const struct stat*statbuf,int type,struct FTW*ftwbu
     free(all);
     printf("\n\n");
     closedir(tmp);
-    return 0;
+    return FTW_CONTINUE;
 }
