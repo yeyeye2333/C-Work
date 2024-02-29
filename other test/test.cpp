@@ -1,6 +1,7 @@
 #include<memory>
 #include<iostream>
 #include <algorithm>
+namespace ttttt{
 struct test
 {
     public:
@@ -11,6 +12,10 @@ struct test
     protected:
         int num=100;
 };
+void tttt(test a,int b)
+{
+    std::cout<<1;
+}
 struct hhh:public test
 {
     void mypr()
@@ -29,13 +34,14 @@ bool com(int c=10)
 template <typename T> void out(T a)
 {
     a();
+}}
+
+void tttt(ttttt::test a,double b)
+{
+    std::cout<<2;
 }
 int main()
 {
-    hhh a;
-    a.print();  
-    a.mypr();
-    ttt<int>();
+    tttt(ttttt::test(),1.0);
     char b[10]="hello";
-    out(com);
 }

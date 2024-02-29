@@ -12,7 +12,10 @@
         "dirent.h": "c",
         "ftw.h": "c",
         "limits.h": "c",
-        "signal.h": "c"
+        "signal.h": "c",
+        "seat.h": "c",
+        "list.h": "c",
+        "main_menu.h": "c"
     },
     "terminal.explorerKind": "external"
 }
