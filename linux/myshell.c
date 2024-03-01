@@ -147,7 +147,7 @@ void onecommand(char*onecommand,char*lastdir,int in,int out,int err)
     free(strs);
     free(theargv);
 }
-void red(char*onecommand,int*in,int*out,int*err)
+void redir(char*onecommand,int*in,int*out,int*err)
 {
     struct strbuf**strs=strbuf_split_buf(onecommand,strlen(onecommand),' ',strlen(onecommand));
     char*instr=NULL,*outstr=NULL,*errstr=NULL;
