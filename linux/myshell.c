@@ -19,7 +19,7 @@ struct strbuf {
 };
 int built_in(char*lastdir,char**theargv);
 void onecommand(char*onecommand,char*lastdir,int in,int out,int err);
-void red(char*onecommand,int*in,int*out,int*err);
+void redir(char*onecommand,int*in,int*out,int*err);
 void mysystem(char*command,char*lastdir);
 void strbuf_grow(struct strbuf *sb, size_t extra);
 void strbuf_init(struct strbuf*sb,size_t alloc);
@@ -28,6 +28,7 @@ void strbuf_add(struct strbuf *sb, const void *data, size_t len);
 char* _strchr(char*str,int n,int len);
 struct strbuf **strbuf_split_buf(const char *str, size_t len, int terminator, int max);
 sigset_t set,oldset;
+static pid_t bg=0;
 int main()
 {
     sigemptyset(&set);
@@ -123,6 +124,12 @@ void onecommand(char*onecommand,char*lastdir,int in,int out,int err)
             case 0:
                 if(sigprocmask(SIG_SETMASK,&oldset,NULL)==-1)
                     fprintf(fdopen(STDERR_FILENO,"w"),"errno:sigprocmask\n");
+                if(bg=1)
+                {
+                    bg=getpid();
+                    setpgid(0,bg);
+                }
+                else if(bg>1)setpgid(0,bg);
                 execvp(theargv[0],theargv);
                 fprintf(fdopen(STDERR_FILENO,"w"),"errno:execvp\n");
                 break;
@@ -243,7 +250,12 @@ void redir(char*onecommand,int*in,int*out,int*err)
 void mysystem(char*command,char*lastdir)
 {
     char*chr;
-    if((chr=strchr(command,'\n'))!=NULL)*chr='\0';//消去换行符
+    if((chr=strchr(command,'&'))!=NULL)
+    {
+        *chr='\0';
+        bg=1;
+    }//处理&
+    else if((chr=strchr(command,'\n'))!=NULL)*chr='\0';//消去换行符
     struct strbuf**strs=strbuf_split_buf(command,strlen(command),'|',strlen(command));
     int count=0;
     for(;strs[count]!=NULL;count++)
@@ -257,11 +269,11 @@ void mysystem(char*command,char*lastdir)
         }
     //处理第一个命令的标准输入重定向
     int in=-1;
-    red(strs[0]->buf,&in,NULL,NULL);
+    redir(strs[0]->buf,&in,NULL,NULL);
     //处理最后一个命令的输出重定向
     int out=-1;
     int err=-1;
-    red(strs[count-1]->buf,NULL,&out,&err);
+    redir(strs[count-1]->buf,NULL,&out,&err);
     
     if(count==0)goto here;
     for(int c=0;c<count;c++)
@@ -271,7 +283,10 @@ void mysystem(char*command,char*lastdir)
         else if(c==count-1)onecommand(strs[c]->buf,lastdir,pfd[c-1][0],out,err);
         else onecommand(strs[c]->buf,lastdir,pfd[c-1][1],pfd[c][1],-1);
     }
-    while(wait(NULL)!=-1||errno!=ECHILD);
+    if(bg=0)
+    {
+        while(wait(NULL)!=-1||errno!=ECHILD);
+    }
 
     here:
     //关闭管道、重定向
@@ -290,6 +305,7 @@ void mysystem(char*command,char*lastdir)
         free(strs[c]);
     }
     free(strs);
+    bg=0;
 }
 
 void strbuf_grow(struct strbuf *sb, size_t extra)
