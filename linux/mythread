@@ -1,0 +1,166 @@
+#ifndef mythread
+#define mythread
+#include <memory>
+#include<queue>
+#include<pthread.h>
+#include<list>
+#include<thread>
+#include<functional>
+#include<iostream>
+#include<unistd.h>
+#ifndef Threads_max
+#define Threads_max 20
+#endif
+
+using std::thread;
+using std::unique_ptr;
+// Single-producer , single-consumer Queue
+template<class T>
+class SPSCQueue {
+public:
+    explicit SPSCQueue(int capacity);
+    virtual bool Push(unique_ptr<T>) = 0;
+    virtual unique_ptr<T> pop() = 0;
+    virtual ~SPSCQueue() = 0;
+};
+
+//Multi-producer , Multi-consumer Queue
+template<class T>
+class MPMCQueue {
+public:
+    explicit MPMCQueue(int val):capacity(val){}
+    virtual bool Push(T) = 0;
+    virtual T pop() = 0;
+    virtual ~MPMCQueue() {};
+protected:
+    int capacity;
+};
+template<typename T>
+class mpmc:public MPMCQueue<T>{
+public:
+    explicit mpmc(int val=30):MPMCQueue<T>(val){pthread_mutex_init(&cur_mtx,nullptr);}
+    bool Push(T);
+    T pop();
+    int size()
+    {
+        return cur;
+    }
+    ~mpmc(){};
+private:
+    std::queue<T> que;
+    int cur=0;
+    pthread_mutex_t cur_mtx;
+};
+
+//threadpool
+class threadpool{
+public:
+    explicit threadpool(int val=10,int val2=30):cur(val>Threads_max?Threads_max:val),task(val2),max_task(val2)
+    {
+        pthread_mutex_init(&pool_mtx,nullptr);
+        pthread_cond_init(&pool_cond,nullptr);
+        for(int c=0;c<cur;c++)
+        {
+            threads.emplace_back(&threadpool::working,this);
+        }
+    }
+    template<typename T,typename...A>bool addtask(T*atask,A&&...argc)
+    {
+        auto result=task.Push(std::bind(atask,argc...));
+        if(result==0)
+        {
+            pthread_cond_broadcast(&pool_cond);
+            return 0;
+        }
+        if(task.size()>=(max_task-(max_task>>2)))
+            addthread();
+        pthread_cond_broadcast(&pool_cond);
+        return 1;
+    }
+    ~threadpool()
+    {
+        term=true;
+        pthread_cond_broadcast(&pool_cond);
+        for(auto &a:threads)
+        {
+            if(a.joinable())a.join();
+        }
+    }
+    int thread_num(){return cur;}
+private:
+    mpmc<std::function<void()>> task;
+    int max_task;
+    std::list<thread> threads;
+    int max=Threads_max;
+    unsigned int cur;
+    bool term=false;
+    pthread_mutex_t pool_mtx;
+    pthread_cond_t pool_cond;
+private:
+    void working();
+    bool addthread()
+    {
+        if(cur==Threads_max)
+            return 0;
+        else
+        {
+            ++cur;
+            threads.emplace_back(&threadpool::working,this);
+            return 1;
+        }
+    }
+};
+
+void threadpool::working()
+{
+    while(term==false)
+    {
+        auto atask=task.pop();
+        if(atask!=nullptr)
+        {
+            atask();
+        }
+        else
+        {
+
+            pthread_mutex_lock(&pool_mtx);
+            pthread_cond_wait(&pool_cond,&pool_mtx);
+            pthread_mutex_unlock(&pool_mtx);
+        }
+    }
+    return ;
+}
+template<typename T> bool mpmc<T>::Push(T val)
+{
+    pthread_mutex_lock(&cur_mtx);
+    if(cur<this->capacity)
+    {
+        que.push(val);
+        cur++;
+        pthread_mutex_unlock(&cur_mtx);
+        return 1;
+    }
+    else
+    {
+        pthread_mutex_unlock(&cur_mtx);
+        return 0;
+    }
+}
+template<typename T> T mpmc<T>::pop()
+{
+    pthread_mutex_lock(&cur_mtx);   
+    if(cur==0)
+    {
+        pthread_mutex_unlock(&cur_mtx);
+        return nullptr;
+    }
+    else
+    {
+        cur--;
+        auto ret=que.front();
+        que.pop();
+        pthread_mutex_unlock(&cur_mtx);
+        return ret;
+    }
+}
+#endif

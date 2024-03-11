@@ -124,7 +124,7 @@ void onecommand(char*onecommand,char*lastdir,int in,int out,int err)
             case 0:
                 if(sigprocmask(SIG_SETMASK,&oldset,NULL)==-1)
                     fprintf(fdopen(STDERR_FILENO,"w"),"errno:sigprocmask\n");
-                if(bg=1)
+                if(bg==1)
                 {
                     bg=getpid();
                     setpgid(0,bg);
@@ -283,9 +283,9 @@ void mysystem(char*command,char*lastdir)
         else if(c==count-1)onecommand(strs[c]->buf,lastdir,pfd[c-1][0],out,err);
         else onecommand(strs[c]->buf,lastdir,pfd[c-1][1],pfd[c][1],-1);
     }
-    if(bg=0)
+    if(bg==0)
     {
-        while(wait(NULL)!=-1||errno!=ECHILD);
+        while(wait(NULL)!=-1);
     }
 
     here:
