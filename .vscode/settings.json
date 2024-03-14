@@ -58,7 +58,13 @@
         "limits": "cpp",
         "numbers": "cpp",
         "thread": "cpp",
-        "typeinfo": "cpp"
+        "typeinfo": "cpp",
+        "filesystem": "cpp",
+        "mythread": "cpp",
+        "codecvt": "cpp",
+        "cstring": "cpp",
+        "iomanip": "cpp",
+        "sstream": "cpp"
     },
     "terminal.explorerKind": "external"
 }

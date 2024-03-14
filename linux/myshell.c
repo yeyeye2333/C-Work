@@ -18,7 +18,7 @@ struct strbuf {
     char *buf;
 };
 int built_in(char*lastdir,char**theargv);
-void onecommand(char*onecommand,char*lastdir,int in,int out,int err);
+void onecommand(char*onecommand,char*lastdir,int in,int out,int err,int com_c,int(*pfd)[2]);
 void redir(char*onecommand,int*in,int*out,int*err);
 void mysystem(char*command,char*lastdir);
 void strbuf_grow(struct strbuf *sb, size_t extra);
@@ -73,7 +73,7 @@ int built_in(char*lastdir,char**theargv)
     else return 1;
     return 0;
 }
-void onecommand(char*onecommand,char*lastdir,int in,int out,int err)
+void onecommand(char*onecommand,char*lastdir,int in,int out,int err,int com_c,int(*pfd)[2])
 {
     struct strbuf**strs=strbuf_split_buf(onecommand,strlen(onecommand),' ',strlen(onecommand));
     int count=0;
@@ -108,12 +108,6 @@ void onecommand(char*onecommand,char*lastdir,int in,int out,int err)
         here:;
     }
     theargv[n]=NULL;
-    int ini_in=dup(STDIN_FILENO);
-    int ini_out=dup(STDOUT_FILENO);
-    int ini_err=dup(STDERR_FILENO);
-    if(in>0)dup2(in,STDIN_FILENO);
-    if(out>0)dup2(out,STDOUT_FILENO);
-    if(err>0)dup2(err,STDERR_FILENO);
     if(built_in(lastdir,theargv))
     {
         switch((childpid=fork()))
@@ -122,29 +116,30 @@ void onecommand(char*onecommand,char*lastdir,int in,int out,int err)
             fprintf(fdopen(STDERR_FILENO,"w"),"errno:fork\n");
                 return ;
             case 0:
+                if(in>0)dup2(in,STDIN_FILENO);
+                if(out>0)dup2(out,STDOUT_FILENO);
+                if(err>0)dup2(err,STDERR_FILENO);
+                for(int c=0;c<com_c-1;c++)
+                {
+                    close(pfd[c][0]);
+                    close(pfd[c][1]);
+                }
                 if(sigprocmask(SIG_SETMASK,&oldset,NULL)==-1)
                     fprintf(fdopen(STDERR_FILENO,"w"),"errno:sigprocmask\n");
                 if(bg==1)
                 {
-                    bg=getpid();
-                    setpgid(0,bg);
+                    setpgid(0,0);
                 }
                 else if(bg>1)setpgid(0,bg);
                 execvp(theargv[0],theargv);
                 fprintf(fdopen(STDERR_FILENO,"w"),"errno:execvp\n");
+                exit(1);
                 break;
             default:
+                if(bg==1)bg=childpid;
                 break;
         }
     }
-    
-    //还原
-    if(in>0)dup2(ini_in,STDIN_FILENO);
-    if(out>0)dup2(ini_out,STDOUT_FILENO);
-    if(err>0)dup2(ini_err,STDERR_FILENO);
-    close(ini_in);
-    close(ini_out);
-    close(ini_err);
     //释放内存
     for(int c=0;c<count;c++)
     {
@@ -250,7 +245,7 @@ void redir(char*onecommand,int*in,int*out,int*err)
 void mysystem(char*command,char*lastdir)
 {
     char*chr;
-    if((chr=strchr(command,'&'))!=NULL)
+    if((chr=strchr(command,'&'))!=NULL&&chr[1]!='>')
     {
         *chr='\0';
         bg=1;
@@ -271,24 +266,19 @@ void mysystem(char*command,char*lastdir)
     int in=-1;
     redir(strs[0]->buf,&in,NULL,NULL);
     //处理最后一个命令的输出重定向
-    int out=-1;
-    int err=-1;
+    int out=-1; int err=-1;
     redir(strs[count-1]->buf,NULL,&out,&err);
     
     if(count==0)goto here;
     for(int c=0;c<count;c++)
     {
-        if(c==0&&count==1)onecommand(strs[c]->buf,lastdir,in,out,err);
-        else if(c==0)onecommand(strs[c]->buf,lastdir,in,pfd[c][1],-1);
-        else if(c==count-1)onecommand(strs[c]->buf,lastdir,pfd[c-1][0],out,err);
-        else onecommand(strs[c]->buf,lastdir,pfd[c-1][1],pfd[c][1],-1);
+        if(c==0&&count==1)onecommand(strs[c]->buf,lastdir,in,out,err,count,pfd);
+        else if(c==0)onecommand(strs[c]->buf,lastdir,in,pfd[c][1],-1,count,pfd);
+        else if(c==count-1)onecommand(strs[c]->buf,lastdir,pfd[c-1][0],out,err,count,pfd);
+        else onecommand(strs[c]->buf,lastdir,pfd[c-1][0],pfd[c][1],-1,count,pfd);
     }
-    if(bg==0)
-    {
-        while(wait(NULL)!=-1);
-    }
-
     here:
+
     //关闭管道、重定向
     for(int c=0;c<count-1;c++)
     {
@@ -305,6 +295,11 @@ void mysystem(char*command,char*lastdir)
         free(strs[c]);
     }
     free(strs);
+    if(bg==0)
+    {
+        while(errno!=ECHILD)wait(NULL);
+        errno=0;
+    }
     bg=0;
 }
 

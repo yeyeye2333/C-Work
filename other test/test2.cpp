@@ -1,20 +1,14 @@
-#include<string>
-#include<vector>
-#include<iostream>
-#include<memory>
-#include<functional>
-#include<filesystem>
-using std::cout;
-using std::string;
-using std::vector;
 
-namespace fs=std::filesystem;
+#include <memory>
+#include<queue>
+#include<pthread.h>
+#include<list>
+#include<thread>
+#include<functional>
+#include<iostream>
+#include<unistd.h>
 int main()
 {
-    fs::path a(".");
-    fs::directory_iterator b(a);
-    for(auto &tmp:b)
-    {
-        std::cout<<tmp<<std::endl;
-    }
+    std::queue<int>a;
+
 }
