@@ -9,7 +9,7 @@
 #include<iostream>
 #include<unistd.h>
 #ifndef Threads_max
-#define Threads_max 20
+#define Threads_max 16
 #endif
 
 using std::thread;
@@ -94,7 +94,7 @@ public:
     }
     template<typename T,typename...A>bool addtask(T*atask,A&&...argc)
     {
-        auto result=task.push(std::bind(atask,std::forward<A>(argc)...));
+        auto result=task.push(std::bind(std::forward<T*>(atask),std::forward<A>(argc)...));
         if(result==0)
         {
             pthread_cond_broadcast(&pool_cond);
