@@ -41,7 +41,7 @@ int main()
     getcwd(lastdir,PATH_MAX);
     char command[1000];
     printf("\e[32m%s:\e[0m",getcwd(cwdir,PATH_MAX));
-    while ((fgets(command,1000,fdopen(STDIN_FILENO,"r")))!=NULL)
+    while ((fgets(command,1000,stdin))!=NULL)
     {
         if(command[0]!='\n')
         {

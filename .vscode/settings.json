@@ -64,7 +64,15 @@
         "codecvt": "cpp",
         "cstring": "cpp",
         "iomanip": "cpp",
-        "sstream": "cpp"
+        "sstream": "cpp",
+        "charconv": "cpp",
+        "format": "cpp",
+        "fstream": "cpp",
+        "future": "cpp",
+        "shared_mutex": "cpp",
+        "valarray": "cpp",
+        "variant": "cpp",
+        "mutex": "cpp"
     },
     "terminal.explorerKind": "external"
 }
