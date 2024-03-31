@@ -1,129 +1,154 @@
-#include<mysql/mysql.h>
 #include<hiredis/hiredis.h>
-#include<mutex>
-#include<string>
 #include<memory>
+#include<string>
 #include<vector>
+#include<iostream>
 
 using std::string;
-using std::unique_ptr;
-enum {se,in,de,up,cr,dr};
-class DB_table{
+class redis_res{
 public:
-    DB_table(char*dbname,char*user="root",char*passwd="123456"):ulock(mtx,std::defer_lock)
+    redis_res(redisReply*input):res(input,freeReplyObject){}
+    int type()
     {
-        mysql_library_init(0,nullptr,nullptr);
-        mysql_init(db);
-        mysql_real_connect(db,nullptr,user,passwd,dbname,0,nullptr,0);
+        return res.get()->type;
     }
-    ~DB_table()
+    bool type_error()
     {
-        mysql_close(db);
-        mysql_library_end();
+        return error;
     }
-    DB_res s_f_wh_or(string name,string from,string where,string order);
-    bool i_type_val(string name,string type,string val);
-    bool d_wh(string name,string where);
-    bool u_set_wh(string name,string set,string wh);
-    bool c_val_eng(string name,string val_pri,string engine);
-    bool drop(string name);
-private:
-    string getsql(int flag,string a,string b,string c,string d);
-private:
-    MYSQL*db;
-    std::timed_mutex mtx;
-    std::unique_lock<std::timed_mutex> ulock;
-};
-class DB_res{
-public:
-    DB_res(MYSQL_RES*input):res(input,mysql_free_result){}
-    int col_num()
+    bool isnil()
     {
-        if(res==nullptr)return 0;
+        if(res.get()->type==REDIS_REPLY_NIL)return 1;
+        else return 0;
+    }
+    string getstring()
+    {
+        if(res.get()->type==REDIS_REPLY_STRING)
+        {
+            error=0;
+            return string(res.get()->str,res.get()->len);
+        }
         else
         {
-            mysql_num_fields(res.get());
+            error=1;
+            return "";
         }
     }
-    std::vector<string> getrow()
+    std::vector<string> getarray()
     {
-        int num=col_num();
-        for(int c=0;c<num;c++)
+        std::vector<string> tmp;
+        if(res.get()->type==REDIS_REPLY_ARRAY)
         {
-            
+            for(size_t c=0;c<res.get()->elements;c++)
+            {
+                tmp.emplace_back(res.get()->element[c]->str,res.get()->element[c]->len);
+            }
+            error=0;
+            return std::move(tmp);
         }
+        else 
+        {
+            error=1;
+            return tmp;
+        }
+    }
+    long long getinteger()
+    {
+        if(res.get()->type==REDIS_REPLY_INTEGER)
+        {
+            error=0;
+            return res.get()->integer;
+        }
+        else 
+        {
+            error=1;
+            return 0;
+        }
+    }
+    string getstatus()
+    {
+        if(res.get()->type==REDIS_REPLY_STATUS)
+        {
+            error=0;
+            return res.get()->str;
+        }
+        else
+        {
+            error=1;
+            return "";
+        }
+    }
+    string geterror()
+    {
+        if(res.get()->type==REDIS_REPLY_STATUS)
+        {
+            error=0;
+            return res.get()->str;
+        }
+        else
+        {
+            error=1;
+            return "";
+        }
+    }
+// private:
+    int error=0;
+    std::unique_ptr<redisReply,void(*)(void*)> res;//redis?/void?
+};
+class redis_text{
+public:
+    redis_text(const char*_ip="127.0.0.1",int _port=6379):ip(_ip),port(_port),text(redisConnect(_ip,_port),redisFree)
+    {
+        if(text!=nullptr&&text.get()->err)
+        {
+            std::cerr<<text.get()->errstr<<'\n';
+            text=nullptr;
+        }
+    }
+    redis_res command(const std::vector<string>&argvs)
+    {
+        if(text==nullptr||text.get()->err)
+        {
+            reconnect();
+            return nullptr;
+        }
+        const char* tmp[argvs.size()];
+        size_t tmp2[argvs.size()];
+        for(int c=0;c<argvs.size();c++)
+        {
+            tmp[c]=argvs[c].c_str();
+            tmp2[c]=argvs[c].size();
+        }
+        redisReply*reply;
+        if((reply=(redisReply*)redisCommandArgv(text.get(),argvs.size(),tmp,tmp2))==nullptr)
+        {
+            std::cerr<<text.get()->errstr<<'\n';
+            reconnect();
+            return nullptr;
+        }
+        return reply;
+    }
+    bool isconnect()
+    {
+        if(text==nullptr||text.get()->err)
+        {
+            return reconnect();
+        }
+        return 1;
     }
 private:
-    unique_ptr<MYSQL_RES,void(*)(MYSQL_RES*)> res;
+    bool reconnect()
+    {
+        *this=redis_text(ip.c_str(),port);
+        if(text==nullptr)return 0;
+        return 1;
+    }
+private:
+    string ip;
+    int port;
+    std::unique_ptr<redisContext,void(*)(redisContext*)> text;
 };
-
 int main()
 {
 
-}
-
-DB_res DB_table::s_f_wh_or(string col,string name,string where="",string order="")
-{
-    string sql=getsql(se,col,name,where,order);
-    ulock.lock();
-    mysql_query(db,sql.c_str());
-    auto ret=mysql_store_result(db);
-    ulock.unlock();
-    return ret;
-}
-bool DB_table::i_type_val(string name,string type,string val)
-{
-    string sql=getsql(in,name,type,val);
-    mysql_query(db,sql.c_str());
-
-}
-bool DB_table::d_wh(string name,string where)
-{
-
-}
-bool DB_table::u_set_wh(string name,string set,string wh)
-{
-
-}
-bool DB_table::c_val_eng(string name,string val_pri,string engine="innodb")
-{
-
-}
-bool DB_table::drop(string name)
-{  
-
-}
-string DB_table::getsql(int flag,string a,string b="",string c="",string d="")
-{
-    string sql;
-    switch (flag)
-    {
-        case se:
-            if(d.size()!=0)
-                sql="select"+a+"from"+b+"where"+c+"order by"+d;
-            else if(c.size()!=0)
-                sql="select"+a+"from"+b+"where"+c;
-            else 
-                sql="select"+a+"from"+b;
-            break;
-        
-        case in:
-            sql="insert into"+a+"("+b+")values("+c+")";
-
-        case de:
-            sql="delete from"+a+"where"+b;
-
-        case up:
-            sql="update"+a+"set"+b+"where"+c;
-
-        case cr:
-            sql="create table"+a+"("+b+")engine="+c;
-
-        case dr:
-            sql="drop table"+a;
-
-        default:
-            break;
-    }
-    return std::move(sql);
 }
