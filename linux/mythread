@@ -9,7 +9,7 @@
 #include<iostream>
 #include<unistd.h>
 #ifndef Threads_max
-#define Threads_max 16
+#define Threads_max 12
 #endif
 
 using std::thread;

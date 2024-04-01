@@ -1,5 +1,5 @@
-#ifndef chat_save_mysql
-#define chat_save_mysql
+#ifndef chat_Server_Save_mysql
+#define chat_Server_Save_mysql
 
 #include<mysql/mysql.h>
 #include<hiredis/hiredis.h>

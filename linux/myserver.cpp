@@ -11,7 +11,7 @@
 void lis_connect(int lfd,int ep_fd,sockaddr*addr=nullptr,socklen_t len=0);
 void deal_cli(epoll_event ev);
 void deal_n(int fd);
-int main()
+int main() 
 {
     sigset_t sig;
     sigemptyset(&sig);

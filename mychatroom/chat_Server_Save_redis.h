@@ -1,3 +1,6 @@
+#ifndef chat_Server_Save_redis
+#define chat_Server_Save_redis
+
 #include<hiredis/hiredis.h>
 #include<memory>
 #include<string>
@@ -161,3 +164,4 @@ private:
     std::unique_ptr<redisContext,void(*)(redisContext*)> text;
 };
 
+#endif

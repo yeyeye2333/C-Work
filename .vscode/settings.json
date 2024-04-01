@@ -84,5 +84,6 @@
         "stdfloat": "cpp",
         "cinttypes": "cpp"
     },
-    "terminal.explorerKind": "external"
+    "terminal.explorerKind": "external",
+    "C_Cpp.intelliSenseEngineFallback": "enabled"
 }
