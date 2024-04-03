@@ -82,7 +82,8 @@
         "optional": "cpp",
         "span": "cpp",
         "stdfloat": "cpp",
-        "cinttypes": "cpp"
+        "cinttypes": "cpp",
+        "*.inc": "cpp"
     },
     "terminal.explorerKind": "external",
     "C_Cpp.intelliSenseEngineFallback": "enabled"

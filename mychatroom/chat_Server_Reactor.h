@@ -23,12 +23,6 @@ public:
             ev.events=EPOLLIN|EPOLLRDHUP;
             if(epoll_ctl(efd,EPOLL_CTL_ADD,fd,&ev)==-1)return 0;
         }
-        else if(type==listen)
-        {
-            ev.data.fd=fd;
-            ev.events=EPOLLIN;
-            if(epoll_ctl(efd,EPOLL_CTL_ADD,fd,&ev)==-1)return 0;
-        }
         fd_map[fd]=type;
         cur++;
         return 1;

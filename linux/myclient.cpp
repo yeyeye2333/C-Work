@@ -17,7 +17,6 @@ int main(int argc,char**argv)
     hints.ai_protocol=0;
     hints.ai_flags=AI_NUMERICSERV;
     getaddrinfo(nullptr,Server_port,&hints,&result);
-    errno=0;
     for(auto rp=result;rp!=nullptr;rp=rp->ai_next)
     {
         cfd=socket(rp->ai_family,rp->ai_socktype|SOCK_CLOEXEC,rp->ai_protocol);
