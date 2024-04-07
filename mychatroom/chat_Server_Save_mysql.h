@@ -44,16 +44,16 @@ private:
 
 class mysql_table{
 public:
-    mysql_table(string _dbname,string _user="root",string _passwd="123456",string _host="",int _port=0):ulock(mtx,std::defer_lock)
+    mysql_table(string _dbname="chatroom",string _user="root",string _passwd="123456",string _host="",int _port=0)
     {
-        mysql_library_init(0,nullptr,nullptr);
+        std::call_once(begin_flag,mysql_library_init,0,nullptr,nullptr);
         mysql_init(&db);
         mysql_real_connect(&db,_host.c_str(),_user.c_str(),_passwd.c_str(),_dbname.c_str(),_port,nullptr,0);
     }
     ~mysql_table()
     {
         mysql_close(&db);
-        mysql_library_end();
+        std::call_once(end_flag,mysql_library_end);
     }
     bool ping()
     {
@@ -61,7 +61,7 @@ public:
     }
     mysql_res s_f_wh_or(string name,string from,string where="",string order="");
     bool i_type_val(string name,string type,string val);
-    bool d_wh(string name,string where);
+    bool d(string name);
     bool up_set_wh(string name,string set,string wh);
     bool c_val_eng(string name,string val_pri,string engine="innodb");
     bool drop(string name);
@@ -73,19 +73,18 @@ private:
     string getsql(int flag,string a,string b="",string c="",string d="");
 private:
     MYSQL db;
-    std::timed_mutex mtx;
-    std::unique_lock<std::timed_mutex> ulock;
+    static std::once_flag begin_flag;
+    static std::once_flag end_flag;
 };
-
+std::once_flag mysql_table::begin_flag;
+std::once_flag mysql_table::end_flag;
 
 
 mysql_res mysql_table::s_f_wh_or(string col,string name,string where,string order)
 {
     string sql=getsql(se,col,name,where,order);
-    ulock.lock();
     mysql_real_query(&db,sql.c_str(),sql.size());
     auto ret=mysql_store_result(&db);
-    ulock.unlock();
     return ret;
 }
 bool mysql_table::i_type_val(string name,string type,string val)
@@ -93,9 +92,9 @@ bool mysql_table::i_type_val(string name,string type,string val)
     string sql=getsql(in,name,type,val);
     return !mysql_real_query(&db,sql.c_str(),sql.size());
 }
-bool mysql_table::d_wh(string name,string where)
+bool mysql_table::d(string name)
 {
-    string sql=getsql(de,name,where);
+    string sql=getsql(de,name);
     return !mysql_real_query(&db,sql.c_str(),sql.size());
 }
 bool mysql_table::up_set_wh(string name,string set,string wh)
@@ -131,13 +130,13 @@ string mysql_table::getsql(int flag,string a,string b,string c,string d)
             sql="insert into "+a+"("+b+")values("+c+")";
 
         case de:
-            sql="delete from "+a+" where "+b;
+            sql="delete from "+a;
 
         case up:
             sql="update "+a+" set "+b+" where "+c;
 
         case cr:
-            sql="create table "+a+"("+b+")engine="+c;
+            sql="create table if not exist "+a+"("+b+")engine="+c;
 
         case dr:
             sql="drop table "+a;

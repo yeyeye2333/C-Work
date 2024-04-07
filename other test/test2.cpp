@@ -1,5 +1,5 @@
 #include"Foo.pb.h"
-int mian()
+int main()
 {
-    
+    return 0;
 }

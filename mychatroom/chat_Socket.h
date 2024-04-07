@@ -81,6 +81,10 @@ public:
         freeaddrinfo(result);
         return ret;
     }
+    int _fd()
+    {
+        return fd;
+    }
 private:
     int fd;
 };
