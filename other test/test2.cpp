@@ -1,5 +1,5 @@
-#include"Foo.pb.h"
+#include<iostream>
 int main()
 {
-    return 0;
+    std::cout<<"111";
 }

@@ -68,7 +68,8 @@ public:
         hints.ai_socktype=SOCK_STREAM;
         hints.ai_protocol=0;
         hints.ai_flags=AI_NUMERICSERV;
-        getaddrinfo(ser_name.c_str(),ser_port.c_str(),&hints,&result);
+        if(ser_name.size()==0)getaddrinfo(nullptr,ser_port.c_str(),&hints,&result);
+        else getaddrinfo(ser_name.c_str(),ser_port.c_str(),&hints,&result);
         int ret=1;
         for(auto rp=result;rp!=nullptr;rp=rp->ai_next)
         {

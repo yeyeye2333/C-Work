@@ -7,6 +7,7 @@ int main()
     test::Foo b;
     b.set_a("hhh");
     b.set_b(233);
+    b.set_c(243242);
     std::string str;
     b.SerializeToString(&str);
     int tmp=str.size();

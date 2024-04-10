@@ -1,6 +1,6 @@
 #ifndef chat_Server_Threadpool
 #define chat_Server_Threadpool
-#include"chat_Server_Threadpool_Task.h"
+#include"chat_Threadpool_Task.h"
 #include<functional>
 #include<thread>
 #include<mutex>
@@ -12,7 +12,7 @@
 using std::thread;
 class Threadpool{
 public:
-    Threadpool(unsigned int val=8,unsigned int val2=-1)
+    Threadpool(unsigned int val=6,unsigned int val2=-1)
     :cur_threads(val>Threads_max?Threads_max:val),task(val2),max_task(val2),pool_ulock(pool_mtx,std::defer_lock)
     {
         for(int c=0;c<cur_threads;c++)

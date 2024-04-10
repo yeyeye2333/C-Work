@@ -15,6 +15,6 @@ int main()
     char str[len];
     read(cli,str,len);
     a.ParseFromArray(str,len);
-    std::cout<<a.DebugString()<<"'\nfrom'\n"<<std::string(str,len)<<std::endl;
-    std::cout<<a.a()<<" and "<<a.b();
+    std::cout<<a.DebugString()<<"\nfrom\n"<<std::string(str,len)<<"is"<<len<<std::endl;
+    std::cout<<a.a()<<" and "<<a.b()<<" "<<a.c();
 }

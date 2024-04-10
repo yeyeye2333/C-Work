@@ -65,6 +65,22 @@ public:
     bool up_set_wh(string name,string set,string wh);
     bool c_val_eng(string name,string val_pri,string engine="innodb");
     bool drop(string name);
+    long last_insert_id()
+    {
+        return mysql_insert_id(&db);
+    }
+    bool begin()
+    {
+        return mysql_query(&db,"begin");
+    }
+    bool commit()
+    {
+        return mysql_query(&db,"commit");
+    }
+    bool rollback()
+    {
+        return mysql_query(&db,"rollback");
+    }
     string error_what()
     {
         return mysql_error(&db);
