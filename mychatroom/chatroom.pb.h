@@ -60,6 +60,9 @@ namespace chatroom {
 class File;
 struct FileDefaultTypeInternal;
 extern FileDefaultTypeInternal _File_default_instance_;
+class Group_uid;
+struct Group_uidDefaultTypeInternal;
+extern Group_uidDefaultTypeInternal _Group_uid_default_instance_;
 class Head;
 struct HeadDefaultTypeInternal;
 extern HeadDefaultTypeInternal _Head_default_instance_;
@@ -75,6 +78,9 @@ extern MessageDefaultTypeInternal _Message_default_instance_;
 class Signup_info;
 struct Signup_infoDefaultTypeInternal;
 extern Signup_infoDefaultTypeInternal _Signup_info_default_instance_;
+class Strs;
+struct StrsDefaultTypeInternal;
+extern StrsDefaultTypeInternal _Strs_default_instance_;
 }  // namespace chatroom
 namespace google {
 namespace protobuf {
@@ -110,7 +116,7 @@ enum Type : int {
   g_file = 24,
   g_quit = 25,
   g_members = 26,
-  g_addmannager = 27,
+  g_addmanager = 27,
   g_delmanager = 28,
   g_m_history = 29,
   g_f_history0 = 30,
@@ -121,6 +127,9 @@ enum Type : int {
   notify_g_req = 35,
   notify_g_m = 36,
   notify_g_f = 37,
+  g_confirm = 38,
+  fri_confirm = 39,
+  heart_check = 40,
   Type_INT_MIN_SENTINEL_DO_NOT_USE_ =
       std::numeric_limits<::int32_t>::min(),
   Type_INT_MAX_SENTINEL_DO_NOT_USE_ =
@@ -130,8 +139,8 @@ enum Type : int {
 bool Type_IsValid(int value);
 extern const uint32_t Type_internal_data_[];
 constexpr Type Type_MIN = static_cast<Type>(0);
-constexpr Type Type_MAX = static_cast<Type>(37);
-constexpr int Type_ARRAYSIZE = 37 + 1;
+constexpr Type Type_MAX = static_cast<Type>(40);
+constexpr int Type_ARRAYSIZE = 40 + 1;
 const ::google::protobuf::EnumDescriptor*
 Type_descriptor();
 template <typename T>
@@ -144,7 +153,7 @@ const std::string& Type_Name(T value) {
 template <>
 inline const std::string& Type_Name(Type value) {
   return ::google::protobuf::internal::NameOfDenseEnum<Type_descriptor,
-                                                 0, 37>(
+                                                 0, 40>(
       static_cast<int>(value));
 }
 inline bool Type_Parse(absl::string_view name, Type* value) {
@@ -156,6 +165,199 @@ inline bool Type_Parse(absl::string_view name, Type* value) {
 
 
 // -------------------------------------------------------------------
+
+class Strs final :
+    public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:chatroom.Strs) */ {
+ public:
+  inline Strs() : Strs(nullptr) {}
+  ~Strs() override;
+  template<typename = void>
+  explicit PROTOBUF_CONSTEXPR Strs(::google::protobuf::internal::ConstantInitialized);
+
+  inline Strs(const Strs& from)
+      : Strs(nullptr, from) {}
+  Strs(Strs&& from) noexcept
+    : Strs() {
+    *this = ::std::move(from);
+  }
+
+  inline Strs& operator=(const Strs& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline Strs& operator=(Strs&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetArena() == from.GetArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const Strs& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const Strs* internal_default_instance() {
+    return reinterpret_cast<const Strs*>(
+               &_Strs_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    7;
+
+  friend void swap(Strs& a, Strs& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(Strs* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetArena() != nullptr &&
+        GetArena() == other->GetArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetArena() == other->GetArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(Strs* other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  Strs* New(::google::protobuf::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<Strs>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const Strs& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom( const Strs& from) {
+    Strs::MergeImpl(*this, from);
+  }
+  private:
+  static void MergeImpl(::google::protobuf::Message& to_msg, const ::google::protobuf::Message& from_msg);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  ::size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::google::protobuf::internal::ParseContext* ctx) final;
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target, ::google::protobuf::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  ::google::protobuf::internal::CachedSize* AccessCachedSize() const final;
+  void SharedCtor(::google::protobuf::Arena* arena);
+  void SharedDtor();
+  void InternalSwap(Strs* other);
+
+  private:
+  friend class ::google::protobuf::internal::AnyMetadata;
+  static ::absl::string_view FullMessageName() {
+    return "chatroom.Strs";
+  }
+  protected:
+  explicit Strs(::google::protobuf::Arena* arena);
+  Strs(::google::protobuf::Arena* arena, const Strs& from);
+  public:
+
+  static const ClassData _class_data_;
+  const ::google::protobuf::Message::ClassData*GetClassData() const final;
+
+  ::google::protobuf::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kStrFieldNumber = 1,
+  };
+  // repeated string str = 1;
+  int str_size() const;
+  private:
+  int _internal_str_size() const;
+
+  public:
+  void clear_str() ;
+  const std::string& str(int index) const;
+  std::string* mutable_str(int index);
+  void set_str(int index, const std::string& value);
+  void set_str(int index, std::string&& value);
+  void set_str(int index, const char* value);
+  void set_str(int index, const char* value, std::size_t size);
+  void set_str(int index, absl::string_view value);
+  std::string* add_str();
+  void add_str(const std::string& value);
+  void add_str(std::string&& value);
+  void add_str(const char* value);
+  void add_str(const char* value, std::size_t size);
+  void add_str(absl::string_view value);
+  const ::google::protobuf::RepeatedPtrField<std::string>& str() const;
+  ::google::protobuf::RepeatedPtrField<std::string>* mutable_str();
+
+  private:
+  const ::google::protobuf::RepeatedPtrField<std::string>& _internal_str() const;
+  ::google::protobuf::RepeatedPtrField<std::string>* _internal_mutable_str();
+
+  public:
+  // @@protoc_insertion_point(class_scope:chatroom.Strs)
+ private:
+  class _Internal;
+
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<
+      0, 1, 0,
+      25, 2>
+      _table_;
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+
+        inline explicit constexpr Impl_(
+            ::google::protobuf::internal::ConstantInitialized) noexcept;
+        inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                              ::google::protobuf::Arena* arena);
+        inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                              ::google::protobuf::Arena* arena, const Impl_& from);
+    ::google::protobuf::RepeatedPtrField<std::string> str_;
+    mutable ::google::protobuf::internal::CachedSize _cached_size_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_chatroom_2eproto;
+};// -------------------------------------------------------------------
 
 class Signup_info final :
     public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:chatroom.Signup_info) */ {
@@ -504,10 +706,11 @@ class Message final :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kObjFieldNumber = 2,
-    kContextFieldNumber = 3,
+    kObjFieldNumber = 1,
+    kContextFieldNumber = 2,
+    kDateFieldNumber = 3,
   };
-  // repeated int32 obj = 2;
+  // repeated int32 obj = 1;
   int obj_size() const;
   private:
   int _internal_obj_size() const;
@@ -525,7 +728,7 @@ class Message final :
   ::google::protobuf::RepeatedField<::int32_t>* _internal_mutable_obj();
 
   public:
-  // repeated string context = 3;
+  // repeated string context = 2;
   int context_size() const;
   private:
   int _internal_context_size() const;
@@ -553,14 +756,42 @@ class Message final :
   ::google::protobuf::RepeatedPtrField<std::string>* _internal_mutable_context();
 
   public:
+  // repeated string date = 3;
+  int date_size() const;
+  private:
+  int _internal_date_size() const;
+
+  public:
+  void clear_date() ;
+  const std::string& date(int index) const;
+  std::string* mutable_date(int index);
+  void set_date(int index, const std::string& value);
+  void set_date(int index, std::string&& value);
+  void set_date(int index, const char* value);
+  void set_date(int index, const char* value, std::size_t size);
+  void set_date(int index, absl::string_view value);
+  std::string* add_date();
+  void add_date(const std::string& value);
+  void add_date(std::string&& value);
+  void add_date(const char* value);
+  void add_date(const char* value, std::size_t size);
+  void add_date(absl::string_view value);
+  const ::google::protobuf::RepeatedPtrField<std::string>& date() const;
+  ::google::protobuf::RepeatedPtrField<std::string>* mutable_date();
+
+  private:
+  const ::google::protobuf::RepeatedPtrField<std::string>& _internal_date() const;
+  ::google::protobuf::RepeatedPtrField<std::string>* _internal_mutable_date();
+
+  public:
   // @@protoc_insertion_point(class_scope:chatroom.Message)
  private:
   class _Internal;
 
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      1, 2, 0,
-      32, 2>
+      2, 3, 0,
+      36, 2>
       _table_;
   friend class ::google::protobuf::MessageLite;
   friend class ::google::protobuf::Arena;
@@ -579,6 +810,7 @@ class Message final :
     ::google::protobuf::RepeatedField<::int32_t> obj_;
     mutable ::google::protobuf::internal::CachedSize _obj_cached_byte_size_;
     ::google::protobuf::RepeatedPtrField<std::string> context_;
+    ::google::protobuf::RepeatedPtrField<std::string> date_;
     mutable ::google::protobuf::internal::CachedSize _cached_size_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
@@ -841,7 +1073,7 @@ class IDs final :
                &_IDs_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    5;
+    6;
 
   friend void swap(IDs& a, IDs& b) {
     a.Swap(&b);
@@ -914,9 +1146,9 @@ class IDs final :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kIdFieldNumber = 2,
+    kIdFieldNumber = 1,
   };
-  // repeated int32 id = 2;
+  // repeated int32 id = 1;
   int id_size() const;
   private:
   int _internal_id_size() const;
@@ -1169,6 +1401,202 @@ class Head final :
   friend struct ::TableStruct_chatroom_2eproto;
 };// -------------------------------------------------------------------
 
+class Group_uid final :
+    public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:chatroom.Group_uid) */ {
+ public:
+  inline Group_uid() : Group_uid(nullptr) {}
+  ~Group_uid() override;
+  template<typename = void>
+  explicit PROTOBUF_CONSTEXPR Group_uid(::google::protobuf::internal::ConstantInitialized);
+
+  inline Group_uid(const Group_uid& from)
+      : Group_uid(nullptr, from) {}
+  Group_uid(Group_uid&& from) noexcept
+    : Group_uid() {
+    *this = ::std::move(from);
+  }
+
+  inline Group_uid& operator=(const Group_uid& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline Group_uid& operator=(Group_uid&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetArena() == from.GetArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const Group_uid& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const Group_uid* internal_default_instance() {
+    return reinterpret_cast<const Group_uid*>(
+               &_Group_uid_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    5;
+
+  friend void swap(Group_uid& a, Group_uid& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(Group_uid* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetArena() != nullptr &&
+        GetArena() == other->GetArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetArena() == other->GetArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(Group_uid* other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  Group_uid* New(::google::protobuf::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<Group_uid>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const Group_uid& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom( const Group_uid& from) {
+    Group_uid::MergeImpl(*this, from);
+  }
+  private:
+  static void MergeImpl(::google::protobuf::Message& to_msg, const ::google::protobuf::Message& from_msg);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  ::size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::google::protobuf::internal::ParseContext* ctx) final;
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target, ::google::protobuf::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  ::google::protobuf::internal::CachedSize* AccessCachedSize() const final;
+  void SharedCtor(::google::protobuf::Arena* arena);
+  void SharedDtor();
+  void InternalSwap(Group_uid* other);
+
+  private:
+  friend class ::google::protobuf::internal::AnyMetadata;
+  static ::absl::string_view FullMessageName() {
+    return "chatroom.Group_uid";
+  }
+  protected:
+  explicit Group_uid(::google::protobuf::Arena* arena);
+  Group_uid(::google::protobuf::Arena* arena, const Group_uid& from);
+  public:
+
+  static const ClassData _class_data_;
+  const ::google::protobuf::Message::ClassData*GetClassData() const final;
+
+  ::google::protobuf::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kNameFieldNumber = 2,
+    kUidFieldNumber = 1,
+  };
+  // optional string name = 2;
+  bool has_name() const;
+  void clear_name() ;
+  const std::string& name() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_name(Arg_&& arg, Args_... args);
+  std::string* mutable_name();
+  PROTOBUF_NODISCARD std::string* release_name();
+  void set_allocated_name(std::string* value);
+
+  private:
+  const std::string& _internal_name() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_name(
+      const std::string& value);
+  std::string* _internal_mutable_name();
+
+  public:
+  // optional int32 uid = 1;
+  bool has_uid() const;
+  void clear_uid() ;
+  ::int32_t uid() const;
+  void set_uid(::int32_t value);
+
+  private:
+  ::int32_t _internal_uid() const;
+  void _internal_set_uid(::int32_t value);
+
+  public:
+  // @@protoc_insertion_point(class_scope:chatroom.Group_uid)
+ private:
+  class _Internal;
+
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<
+      1, 2, 0,
+      31, 2>
+      _table_;
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+
+        inline explicit constexpr Impl_(
+            ::google::protobuf::internal::ConstantInitialized) noexcept;
+        inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                              ::google::protobuf::Arena* arena);
+        inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                              ::google::protobuf::Arena* arena, const Impl_& from);
+    ::google::protobuf::internal::HasBits<1> _has_bits_;
+    mutable ::google::protobuf::internal::CachedSize _cached_size_;
+    ::google::protobuf::internal::ArenaStringPtr name_;
+    ::int32_t uid_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_chatroom_2eproto;
+};// -------------------------------------------------------------------
+
 class File final :
     public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:chatroom.File) */ {
  public:
@@ -1301,11 +1729,12 @@ class File final :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kObjFieldNumber = 2,
-    kNameFieldNumber = 3,
-    kContextFieldNumber = 4,
+    kObjFieldNumber = 1,
+    kNameFieldNumber = 2,
+    kContextFieldNumber = 3,
+    kDateFieldNumber = 4,
   };
-  // repeated int32 obj = 2;
+  // repeated int32 obj = 1;
   int obj_size() const;
   private:
   int _internal_obj_size() const;
@@ -1323,7 +1752,7 @@ class File final :
   ::google::protobuf::RepeatedField<::int32_t>* _internal_mutable_obj();
 
   public:
-  // repeated string name = 3;
+  // repeated string name = 2;
   int name_size() const;
   private:
   int _internal_name_size() const;
@@ -1351,7 +1780,7 @@ class File final :
   ::google::protobuf::RepeatedPtrField<std::string>* _internal_mutable_name();
 
   public:
-  // repeated bytes context = 4;
+  // repeated bytes context = 3;
   int context_size() const;
   private:
   int _internal_context_size() const;
@@ -1379,14 +1808,42 @@ class File final :
   ::google::protobuf::RepeatedPtrField<std::string>* _internal_mutable_context();
 
   public:
+  // repeated string date = 4;
+  int date_size() const;
+  private:
+  int _internal_date_size() const;
+
+  public:
+  void clear_date() ;
+  const std::string& date(int index) const;
+  std::string* mutable_date(int index);
+  void set_date(int index, const std::string& value);
+  void set_date(int index, std::string&& value);
+  void set_date(int index, const char* value);
+  void set_date(int index, const char* value, std::size_t size);
+  void set_date(int index, absl::string_view value);
+  std::string* add_date();
+  void add_date(const std::string& value);
+  void add_date(std::string&& value);
+  void add_date(const char* value);
+  void add_date(const char* value, std::size_t size);
+  void add_date(absl::string_view value);
+  const ::google::protobuf::RepeatedPtrField<std::string>& date() const;
+  ::google::protobuf::RepeatedPtrField<std::string>* mutable_date();
+
+  private:
+  const ::google::protobuf::RepeatedPtrField<std::string>& _internal_date() const;
+  ::google::protobuf::RepeatedPtrField<std::string>* _internal_mutable_date();
+
+  public:
   // @@protoc_insertion_point(class_scope:chatroom.File)
  private:
   class _Internal;
 
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      2, 3, 0,
-      26, 2>
+      2, 4, 0,
+      30, 2>
       _table_;
   friend class ::google::protobuf::MessageLite;
   friend class ::google::protobuf::Arena;
@@ -1406,6 +1863,7 @@ class File final :
     mutable ::google::protobuf::internal::CachedSize _obj_cached_byte_size_;
     ::google::protobuf::RepeatedPtrField<std::string> name_;
     ::google::protobuf::RepeatedPtrField<std::string> context_;
+    ::google::protobuf::RepeatedPtrField<std::string> date_;
     mutable ::google::protobuf::internal::CachedSize _cached_size_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
@@ -1517,7 +1975,7 @@ inline void Head::_internal_set_len(::int32_t value) {
 
 // File
 
-// repeated int32 obj = 2;
+// repeated int32 obj = 1;
 inline int File::_internal_obj_size() const {
   return _internal_obj().size();
 }
@@ -1562,7 +2020,7 @@ inline ::google::protobuf::RepeatedField<::int32_t>* File::_internal_mutable_obj
   return &_impl_.obj_;
 }
 
-// repeated string name = 3;
+// repeated string name = 2;
 inline int File::_internal_name_size() const {
   return _internal_name().size();
 }
@@ -1663,7 +2121,7 @@ File::_internal_mutable_name() {
   return &_impl_.name_;
 }
 
-// repeated bytes context = 4;
+// repeated bytes context = 3;
 inline int File::_internal_context_size() const {
   return _internal_context().size();
 }
@@ -1764,11 +2222,112 @@ File::_internal_mutable_context() {
   return &_impl_.context_;
 }
 
+// repeated string date = 4;
+inline int File::_internal_date_size() const {
+  return _internal_date().size();
+}
+inline int File::date_size() const {
+  return _internal_date_size();
+}
+inline void File::clear_date() {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  _impl_.date_.Clear();
+}
+inline std::string* File::add_date()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  std::string* _s = _internal_mutable_date()->Add();
+  // @@protoc_insertion_point(field_add_mutable:chatroom.File.date)
+  return _s;
+}
+inline const std::string& File::date(int index) const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:chatroom.File.date)
+  return _internal_date().Get(index);
+}
+inline std::string* File::mutable_date(int index)
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable:chatroom.File.date)
+  return _internal_mutable_date()->Mutable(index);
+}
+inline void File::set_date(int index, const std::string& value) {
+  _internal_mutable_date()->Mutable(index)->assign(value);
+  // @@protoc_insertion_point(field_set:chatroom.File.date)
+}
+inline void File::set_date(int index, std::string&& value) {
+  _internal_mutable_date()->Mutable(index)->assign(std::move(value));
+  // @@protoc_insertion_point(field_set:chatroom.File.date)
+}
+inline void File::set_date(int index, const char* value) {
+  ABSL_DCHECK(value != nullptr);
+  _internal_mutable_date()->Mutable(index)->assign(value);
+  // @@protoc_insertion_point(field_set_char:chatroom.File.date)
+}
+inline void File::set_date(int index, const char* value,
+                              std::size_t size) {
+  _internal_mutable_date()->Mutable(index)->assign(
+      reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:chatroom.File.date)
+}
+inline void File::set_date(int index, absl::string_view value) {
+  _internal_mutable_date()->Mutable(index)->assign(value.data(),
+                                                     value.size());
+  // @@protoc_insertion_point(field_set_string_piece:chatroom.File.date)
+}
+inline void File::add_date(const std::string& value) {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  _internal_mutable_date()->Add()->assign(value);
+  // @@protoc_insertion_point(field_add:chatroom.File.date)
+}
+inline void File::add_date(std::string&& value) {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  _internal_mutable_date()->Add(std::move(value));
+  // @@protoc_insertion_point(field_add:chatroom.File.date)
+}
+inline void File::add_date(const char* value) {
+  ABSL_DCHECK(value != nullptr);
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  _internal_mutable_date()->Add()->assign(value);
+  // @@protoc_insertion_point(field_add_char:chatroom.File.date)
+}
+inline void File::add_date(const char* value, std::size_t size) {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  _internal_mutable_date()->Add()->assign(
+      reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_add_pointer:chatroom.File.date)
+}
+inline void File::add_date(absl::string_view value) {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  _internal_mutable_date()->Add()->assign(value.data(), value.size());
+  // @@protoc_insertion_point(field_add_string_piece:chatroom.File.date)
+}
+inline const ::google::protobuf::RepeatedPtrField<std::string>&
+File::date() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_list:chatroom.File.date)
+  return _internal_date();
+}
+inline ::google::protobuf::RepeatedPtrField<std::string>*
+File::mutable_date() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable_list:chatroom.File.date)
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  return _internal_mutable_date();
+}
+inline const ::google::protobuf::RepeatedPtrField<std::string>&
+File::_internal_date() const {
+  PROTOBUF_TSAN_READ(&_impl_._tsan_detect_race);
+  return _impl_.date_;
+}
+inline ::google::protobuf::RepeatedPtrField<std::string>*
+File::_internal_mutable_date() {
+  PROTOBUF_TSAN_READ(&_impl_._tsan_detect_race);
+  return &_impl_.date_;
+}
+
 // -------------------------------------------------------------------
 
 // Message
 
-// repeated int32 obj = 2;
+// repeated int32 obj = 1;
 inline int Message::_internal_obj_size() const {
   return _internal_obj().size();
 }
@@ -1813,7 +2372,7 @@ inline ::google::protobuf::RepeatedField<::int32_t>* Message::_internal_mutable_
   return &_impl_.obj_;
 }
 
-// repeated string context = 3;
+// repeated string context = 2;
 inline int Message::_internal_context_size() const {
   return _internal_context().size();
 }
@@ -1912,6 +2471,107 @@ inline ::google::protobuf::RepeatedPtrField<std::string>*
 Message::_internal_mutable_context() {
   PROTOBUF_TSAN_READ(&_impl_._tsan_detect_race);
   return &_impl_.context_;
+}
+
+// repeated string date = 3;
+inline int Message::_internal_date_size() const {
+  return _internal_date().size();
+}
+inline int Message::date_size() const {
+  return _internal_date_size();
+}
+inline void Message::clear_date() {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  _impl_.date_.Clear();
+}
+inline std::string* Message::add_date()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  std::string* _s = _internal_mutable_date()->Add();
+  // @@protoc_insertion_point(field_add_mutable:chatroom.Message.date)
+  return _s;
+}
+inline const std::string& Message::date(int index) const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:chatroom.Message.date)
+  return _internal_date().Get(index);
+}
+inline std::string* Message::mutable_date(int index)
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable:chatroom.Message.date)
+  return _internal_mutable_date()->Mutable(index);
+}
+inline void Message::set_date(int index, const std::string& value) {
+  _internal_mutable_date()->Mutable(index)->assign(value);
+  // @@protoc_insertion_point(field_set:chatroom.Message.date)
+}
+inline void Message::set_date(int index, std::string&& value) {
+  _internal_mutable_date()->Mutable(index)->assign(std::move(value));
+  // @@protoc_insertion_point(field_set:chatroom.Message.date)
+}
+inline void Message::set_date(int index, const char* value) {
+  ABSL_DCHECK(value != nullptr);
+  _internal_mutable_date()->Mutable(index)->assign(value);
+  // @@protoc_insertion_point(field_set_char:chatroom.Message.date)
+}
+inline void Message::set_date(int index, const char* value,
+                              std::size_t size) {
+  _internal_mutable_date()->Mutable(index)->assign(
+      reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:chatroom.Message.date)
+}
+inline void Message::set_date(int index, absl::string_view value) {
+  _internal_mutable_date()->Mutable(index)->assign(value.data(),
+                                                     value.size());
+  // @@protoc_insertion_point(field_set_string_piece:chatroom.Message.date)
+}
+inline void Message::add_date(const std::string& value) {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  _internal_mutable_date()->Add()->assign(value);
+  // @@protoc_insertion_point(field_add:chatroom.Message.date)
+}
+inline void Message::add_date(std::string&& value) {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  _internal_mutable_date()->Add(std::move(value));
+  // @@protoc_insertion_point(field_add:chatroom.Message.date)
+}
+inline void Message::add_date(const char* value) {
+  ABSL_DCHECK(value != nullptr);
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  _internal_mutable_date()->Add()->assign(value);
+  // @@protoc_insertion_point(field_add_char:chatroom.Message.date)
+}
+inline void Message::add_date(const char* value, std::size_t size) {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  _internal_mutable_date()->Add()->assign(
+      reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_add_pointer:chatroom.Message.date)
+}
+inline void Message::add_date(absl::string_view value) {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  _internal_mutable_date()->Add()->assign(value.data(), value.size());
+  // @@protoc_insertion_point(field_add_string_piece:chatroom.Message.date)
+}
+inline const ::google::protobuf::RepeatedPtrField<std::string>&
+Message::date() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_list:chatroom.Message.date)
+  return _internal_date();
+}
+inline ::google::protobuf::RepeatedPtrField<std::string>*
+Message::mutable_date() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable_list:chatroom.Message.date)
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  return _internal_mutable_date();
+}
+inline const ::google::protobuf::RepeatedPtrField<std::string>&
+Message::_internal_date() const {
+  PROTOBUF_TSAN_READ(&_impl_._tsan_detect_race);
+  return _impl_.date_;
+}
+inline ::google::protobuf::RepeatedPtrField<std::string>*
+Message::_internal_mutable_date() {
+  PROTOBUF_TSAN_READ(&_impl_._tsan_detect_race);
+  return &_impl_.date_;
 }
 
 // -------------------------------------------------------------------
@@ -2193,9 +2853,112 @@ inline void Login_info::set_allocated_password(std::string* value) {
 
 // -------------------------------------------------------------------
 
+// Group_uid
+
+// optional int32 uid = 1;
+inline bool Group_uid::has_uid() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000002u) != 0;
+  return value;
+}
+inline void Group_uid::clear_uid() {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  _impl_.uid_ = 0;
+  _impl_._has_bits_[0] &= ~0x00000002u;
+}
+inline ::int32_t Group_uid::uid() const {
+  // @@protoc_insertion_point(field_get:chatroom.Group_uid.uid)
+  return _internal_uid();
+}
+inline void Group_uid::set_uid(::int32_t value) {
+  _internal_set_uid(value);
+  // @@protoc_insertion_point(field_set:chatroom.Group_uid.uid)
+}
+inline ::int32_t Group_uid::_internal_uid() const {
+  PROTOBUF_TSAN_READ(&_impl_._tsan_detect_race);
+  return _impl_.uid_;
+}
+inline void Group_uid::_internal_set_uid(::int32_t value) {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  _impl_._has_bits_[0] |= 0x00000002u;
+  _impl_.uid_ = value;
+}
+
+// optional string name = 2;
+inline bool Group_uid::has_name() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000001u) != 0;
+  return value;
+}
+inline void Group_uid::clear_name() {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  _impl_.name_.ClearToEmpty();
+  _impl_._has_bits_[0] &= ~0x00000001u;
+}
+inline const std::string& Group_uid::name() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:chatroom.Group_uid.name)
+  return _internal_name();
+}
+template <typename Arg_, typename... Args_>
+inline PROTOBUF_ALWAYS_INLINE void Group_uid::set_name(Arg_&& arg,
+                                                     Args_... args) {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  _impl_._has_bits_[0] |= 0x00000001u;
+  _impl_.name_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:chatroom.Group_uid.name)
+}
+inline std::string* Group_uid::mutable_name() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_name();
+  // @@protoc_insertion_point(field_mutable:chatroom.Group_uid.name)
+  return _s;
+}
+inline const std::string& Group_uid::_internal_name() const {
+  PROTOBUF_TSAN_READ(&_impl_._tsan_detect_race);
+  return _impl_.name_.Get();
+}
+inline void Group_uid::_internal_set_name(const std::string& value) {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  _impl_._has_bits_[0] |= 0x00000001u;
+  _impl_.name_.Set(value, GetArena());
+}
+inline std::string* Group_uid::_internal_mutable_name() {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  _impl_._has_bits_[0] |= 0x00000001u;
+  return _impl_.name_.Mutable( GetArena());
+}
+inline std::string* Group_uid::release_name() {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  // @@protoc_insertion_point(field_release:chatroom.Group_uid.name)
+  if ((_impl_._has_bits_[0] & 0x00000001u) == 0) {
+    return nullptr;
+  }
+  _impl_._has_bits_[0] &= ~0x00000001u;
+  auto* released = _impl_.name_.Release();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  _impl_.name_.Set("", GetArena());
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  return released;
+}
+inline void Group_uid::set_allocated_name(std::string* value) {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  if (value != nullptr) {
+    _impl_._has_bits_[0] |= 0x00000001u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000001u;
+  }
+  _impl_.name_.SetAllocated(value, GetArena());
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        if (_impl_.name_.IsDefault()) {
+          _impl_.name_.Set("", GetArena());
+        }
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:chatroom.Group_uid.name)
+}
+
+// -------------------------------------------------------------------
+
 // IDs
 
-// repeated int32 id = 2;
+// repeated int32 id = 1;
 inline int IDs::_internal_id_size() const {
   return _internal_id().size();
 }
@@ -2238,6 +3001,111 @@ inline const ::google::protobuf::RepeatedField<::int32_t>& IDs::_internal_id()
 inline ::google::protobuf::RepeatedField<::int32_t>* IDs::_internal_mutable_id() {
   PROTOBUF_TSAN_READ(&_impl_._tsan_detect_race);
   return &_impl_.id_;
+}
+
+// -------------------------------------------------------------------
+
+// Strs
+
+// repeated string str = 1;
+inline int Strs::_internal_str_size() const {
+  return _internal_str().size();
+}
+inline int Strs::str_size() const {
+  return _internal_str_size();
+}
+inline void Strs::clear_str() {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  _impl_.str_.Clear();
+}
+inline std::string* Strs::add_str()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  std::string* _s = _internal_mutable_str()->Add();
+  // @@protoc_insertion_point(field_add_mutable:chatroom.Strs.str)
+  return _s;
+}
+inline const std::string& Strs::str(int index) const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:chatroom.Strs.str)
+  return _internal_str().Get(index);
+}
+inline std::string* Strs::mutable_str(int index)
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable:chatroom.Strs.str)
+  return _internal_mutable_str()->Mutable(index);
+}
+inline void Strs::set_str(int index, const std::string& value) {
+  _internal_mutable_str()->Mutable(index)->assign(value);
+  // @@protoc_insertion_point(field_set:chatroom.Strs.str)
+}
+inline void Strs::set_str(int index, std::string&& value) {
+  _internal_mutable_str()->Mutable(index)->assign(std::move(value));
+  // @@protoc_insertion_point(field_set:chatroom.Strs.str)
+}
+inline void Strs::set_str(int index, const char* value) {
+  ABSL_DCHECK(value != nullptr);
+  _internal_mutable_str()->Mutable(index)->assign(value);
+  // @@protoc_insertion_point(field_set_char:chatroom.Strs.str)
+}
+inline void Strs::set_str(int index, const char* value,
+                              std::size_t size) {
+  _internal_mutable_str()->Mutable(index)->assign(
+      reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:chatroom.Strs.str)
+}
+inline void Strs::set_str(int index, absl::string_view value) {
+  _internal_mutable_str()->Mutable(index)->assign(value.data(),
+                                                     value.size());
+  // @@protoc_insertion_point(field_set_string_piece:chatroom.Strs.str)
+}
+inline void Strs::add_str(const std::string& value) {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  _internal_mutable_str()->Add()->assign(value);
+  // @@protoc_insertion_point(field_add:chatroom.Strs.str)
+}
+inline void Strs::add_str(std::string&& value) {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  _internal_mutable_str()->Add(std::move(value));
+  // @@protoc_insertion_point(field_add:chatroom.Strs.str)
+}
+inline void Strs::add_str(const char* value) {
+  ABSL_DCHECK(value != nullptr);
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  _internal_mutable_str()->Add()->assign(value);
+  // @@protoc_insertion_point(field_add_char:chatroom.Strs.str)
+}
+inline void Strs::add_str(const char* value, std::size_t size) {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  _internal_mutable_str()->Add()->assign(
+      reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_add_pointer:chatroom.Strs.str)
+}
+inline void Strs::add_str(absl::string_view value) {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  _internal_mutable_str()->Add()->assign(value.data(), value.size());
+  // @@protoc_insertion_point(field_add_string_piece:chatroom.Strs.str)
+}
+inline const ::google::protobuf::RepeatedPtrField<std::string>&
+Strs::str() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_list:chatroom.Strs.str)
+  return _internal_str();
+}
+inline ::google::protobuf::RepeatedPtrField<std::string>*
+Strs::mutable_str() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable_list:chatroom.Strs.str)
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  return _internal_mutable_str();
+}
+inline const ::google::protobuf::RepeatedPtrField<std::string>&
+Strs::_internal_str() const {
+  PROTOBUF_TSAN_READ(&_impl_._tsan_detect_race);
+  return _impl_.str_;
+}
+inline ::google::protobuf::RepeatedPtrField<std::string>*
+Strs::_internal_mutable_str() {
+  PROTOBUF_TSAN_READ(&_impl_._tsan_detect_race);
+  return &_impl_.str_;
 }
 
 #ifdef __GNUC__

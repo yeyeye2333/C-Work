@@ -22,6 +22,25 @@ namespace _pbi = ::google::protobuf::internal;
 namespace _fl = ::google::protobuf::internal::field_layout;
 namespace chatroom {
 
+inline constexpr Strs::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : str_{},
+        _cached_size_{0} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR Strs::Strs(::_pbi::ConstantInitialized)
+    : _impl_(::_pbi::ConstantInitialized()) {}
+struct StrsDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR StrsDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~StrsDefaultTypeInternal() {}
+  union {
+    Strs _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 StrsDefaultTypeInternal _Strs_default_instance_;
+
 inline constexpr Signup_info::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : _cached_size_{0},
@@ -52,6 +71,7 @@ inline constexpr Message::Impl_::Impl_(
       : obj_{},
         _obj_cached_byte_size_{0},
         context_{},
+        date_{},
         _cached_size_{0} {}
 
 template <typename>
@@ -131,12 +151,35 @@ struct HeadDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 HeadDefaultTypeInternal _Head_default_instance_;
 
+inline constexpr Group_uid::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : _cached_size_{0},
+        name_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        uid_{0} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR Group_uid::Group_uid(::_pbi::ConstantInitialized)
+    : _impl_(::_pbi::ConstantInitialized()) {}
+struct Group_uidDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR Group_uidDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~Group_uidDefaultTypeInternal() {}
+  union {
+    Group_uid _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 Group_uidDefaultTypeInternal _Group_uid_default_instance_;
+
 inline constexpr File::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : obj_{},
         _obj_cached_byte_size_{0},
         name_{},
         context_{},
+        date_{},
         _cached_size_{0} {}
 
 template <typename>
@@ -153,7 +196,7 @@ struct FileDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 FileDefaultTypeInternal _File_default_instance_;
 }  // namespace chatroom
-static ::_pb::Metadata file_level_metadata_chatroom_2eproto[6];
+static ::_pb::Metadata file_level_metadata_chatroom_2eproto[8];
 static const ::_pb::EnumDescriptor* file_level_enum_descriptors_chatroom_2eproto[1];
 static constexpr const ::_pb::ServiceDescriptor**
     file_level_service_descriptors_chatroom_2eproto = nullptr;
@@ -184,6 +227,7 @@ const ::uint32_t TableStruct_chatroom_2eproto::offsets[] PROTOBUF_SECTION_VARIAB
     PROTOBUF_FIELD_OFFSET(::chatroom::File, _impl_.obj_),
     PROTOBUF_FIELD_OFFSET(::chatroom::File, _impl_.name_),
     PROTOBUF_FIELD_OFFSET(::chatroom::File, _impl_.context_),
+    PROTOBUF_FIELD_OFFSET(::chatroom::File, _impl_.date_),
     ~0u,  // no _has_bits_
     PROTOBUF_FIELD_OFFSET(::chatroom::Message, _internal_metadata_),
     ~0u,  // no _extensions_
@@ -194,6 +238,7 @@ const ::uint32_t TableStruct_chatroom_2eproto::offsets[] PROTOBUF_SECTION_VARIAB
     ~0u,  // no sizeof(Split)
     PROTOBUF_FIELD_OFFSET(::chatroom::Message, _impl_.obj_),
     PROTOBUF_FIELD_OFFSET(::chatroom::Message, _impl_.context_),
+    PROTOBUF_FIELD_OFFSET(::chatroom::Message, _impl_.date_),
     PROTOBUF_FIELD_OFFSET(::chatroom::Signup_info, _impl_._has_bits_),
     PROTOBUF_FIELD_OFFSET(::chatroom::Signup_info, _internal_metadata_),
     ~0u,  // no _extensions_
@@ -220,6 +265,18 @@ const ::uint32_t TableStruct_chatroom_2eproto::offsets[] PROTOBUF_SECTION_VARIAB
     PROTOBUF_FIELD_OFFSET(::chatroom::Login_info, _impl_.password_),
     1,
     0,
+    PROTOBUF_FIELD_OFFSET(::chatroom::Group_uid, _impl_._has_bits_),
+    PROTOBUF_FIELD_OFFSET(::chatroom::Group_uid, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    PROTOBUF_FIELD_OFFSET(::chatroom::Group_uid, _impl_.uid_),
+    PROTOBUF_FIELD_OFFSET(::chatroom::Group_uid, _impl_.name_),
+    1,
+    0,
     ~0u,  // no _has_bits_
     PROTOBUF_FIELD_OFFSET(::chatroom::IDs, _internal_metadata_),
     ~0u,  // no _extensions_
@@ -229,16 +286,27 @@ const ::uint32_t TableStruct_chatroom_2eproto::offsets[] PROTOBUF_SECTION_VARIAB
     ~0u,  // no _split_
     ~0u,  // no sizeof(Split)
     PROTOBUF_FIELD_OFFSET(::chatroom::IDs, _impl_.id_),
+    ~0u,  // no _has_bits_
+    PROTOBUF_FIELD_OFFSET(::chatroom::Strs, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    PROTOBUF_FIELD_OFFSET(::chatroom::Strs, _impl_.str_),
 };
 
 static const ::_pbi::MigrationSchema
     schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
         {0, 11, -1, sizeof(::chatroom::Head)},
         {14, -1, -1, sizeof(::chatroom::File)},
-        {25, -1, -1, sizeof(::chatroom::Message)},
-        {35, 46, -1, sizeof(::chatroom::Signup_info)},
-        {49, 59, -1, sizeof(::chatroom::Login_info)},
-        {61, -1, -1, sizeof(::chatroom::IDs)},
+        {26, -1, -1, sizeof(::chatroom::Message)},
+        {37, 48, -1, sizeof(::chatroom::Signup_info)},
+        {51, 61, -1, sizeof(::chatroom::Login_info)},
+        {63, 73, -1, sizeof(::chatroom::Group_uid)},
+        {75, -1, -1, sizeof(::chatroom::IDs)},
+        {84, -1, -1, sizeof(::chatroom::Strs)},
 };
 
 static const ::_pb::Message* const file_default_instances[] = {
@@ -247,46 +315,52 @@ static const ::_pb::Message* const file_default_instances[] = {
     &::chatroom::_Message_default_instance_._instance,
     &::chatroom::_Signup_info_default_instance_._instance,
     &::chatroom::_Login_info_default_instance_._instance,
+    &::chatroom::_Group_uid_default_instance_._instance,
     &::chatroom::_IDs_default_instance_._instance,
+    &::chatroom::_Strs_default_instance_._instance,
 };
 const char descriptor_table_protodef_chatroom_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
     "\n\016chatroom.proto\022\010chatroom\"d\n\004Head\022\017\n\002is"
     "\030\001 \001(\010H\000\210\001\001\022!\n\004type\030\002 \001(\0162\016.chatroom.Typ"
     "eH\001\210\001\001\022\020\n\003len\030\003 \001(\005H\002\210\001\001B\005\n\003_isB\007\n\005_type"
-    "B\006\n\004_len\"2\n\004File\022\013\n\003obj\030\002 \003(\005\022\014\n\004name\030\003 "
-    "\003(\t\022\017\n\007context\030\004 \003(\014\"\'\n\007Message\022\013\n\003obj\030\002"
-    " \003(\005\022\017\n\007context\030\003 \003(\t\"g\n\013Signup_info\022\020\n\003"
-    "uid\030\001 \001(\005H\000\210\001\001\022\021\n\004name\030\002 \001(\tH\001\210\001\001\022\025\n\010pas"
-    "sword\030\003 \001(\tH\002\210\001\001B\006\n\004_uidB\007\n\005_nameB\013\n\t_pa"
-    "ssword\"J\n\nLogin_info\022\020\n\003uid\030\001 \001(\005H\000\210\001\001\022\025"
-    "\n\010password\030\002 \001(\tH\001\210\001\001B\006\n\004_uidB\013\n\t_passwo"
-    "rd\"\021\n\003IDs\022\n\n\002id\030\002 \003(\005*\264\004\n\004Type\022\013\n\007nothin"
-    "g\020\000\022\t\n\005login\020\001\022\n\n\006signup\020\002\022\n\n\006logout\020\003\022\014"
-    "\n\010u_search\020\004\022\r\n\tu_request\020\005\022\r\n\tu_listreq"
-    "\020\006\022\t\n\005u_add\020\007\022\t\n\005u_del\020\010\022\n\n\006u_blok\020\t\022\014\n\010"
-    "u_unblok\020\n\022\r\n\tu_message\020\013\022\n\n\006u_file\020\014\022\017\n"
-    "\013u_m_history\020\r\022\020\n\014u_f_history0\020\016\022\020\n\014u_f_"
-    "history1\020\017\022\014\n\010g_create\020\020\022\014\n\010g_disban\020\021\022\r"
-    "\n\tg_request\020\022\022\r\n\tg_listreq\020\023\022\t\n\005g_add\020\024\022"
-    "\t\n\005g_del\020\025\022\014\n\010g_search\020\026\022\r\n\tg_message\020\027\022"
-    "\n\n\006g_file\020\030\022\n\n\006g_quit\020\031\022\r\n\tg_members\020\032\022\021"
-    "\n\rg_addmannager\020\033\022\020\n\014g_delmanager\020\034\022\017\n\013g"
-    "_m_history\020\035\022\020\n\014g_f_history0\020\036\022\020\n\014g_f_hi"
-    "story1\020\037\022\020\n\014notify_u_req\020 \022\016\n\nnotify_u_m"
-    "\020!\022\016\n\nnotify_u_f\020\"\022\020\n\014notify_g_req\020#\022\016\n\n"
-    "notify_g_m\020$\022\016\n\nnotify_g_f\020%b\006proto3"
+    "B\006\n\004_len\"@\n\004File\022\013\n\003obj\030\001 \003(\005\022\014\n\004name\030\002 "
+    "\003(\t\022\017\n\007context\030\003 \003(\014\022\014\n\004date\030\004 \003(\t\"5\n\007Me"
+    "ssage\022\013\n\003obj\030\001 \003(\005\022\017\n\007context\030\002 \003(\t\022\014\n\004d"
+    "ate\030\003 \003(\t\"g\n\013Signup_info\022\020\n\003uid\030\001 \001(\005H\000\210"
+    "\001\001\022\021\n\004name\030\002 \001(\tH\001\210\001\001\022\025\n\010password\030\003 \001(\tH"
+    "\002\210\001\001B\006\n\004_uidB\007\n\005_nameB\013\n\t_password\"J\n\nLo"
+    "gin_info\022\020\n\003uid\030\001 \001(\005H\000\210\001\001\022\025\n\010password\030\002"
+    " \001(\tH\001\210\001\001B\006\n\004_uidB\013\n\t_password\"A\n\tGroup_"
+    "uid\022\020\n\003uid\030\001 \001(\005H\000\210\001\001\022\021\n\004name\030\002 \001(\tH\001\210\001\001"
+    "B\006\n\004_uidB\007\n\005_name\"\021\n\003IDs\022\n\n\002id\030\001 \003(\005\"\023\n\004"
+    "Strs\022\013\n\003str\030\001 \003(\t*\344\004\n\004Type\022\013\n\007nothing\020\000\022"
+    "\t\n\005login\020\001\022\n\n\006signup\020\002\022\n\n\006logout\020\003\022\014\n\010u_"
+    "search\020\004\022\r\n\tu_request\020\005\022\r\n\tu_listreq\020\006\022\t"
+    "\n\005u_add\020\007\022\t\n\005u_del\020\010\022\n\n\006u_blok\020\t\022\014\n\010u_un"
+    "blok\020\n\022\r\n\tu_message\020\013\022\n\n\006u_file\020\014\022\017\n\013u_m"
+    "_history\020\r\022\020\n\014u_f_history0\020\016\022\020\n\014u_f_hist"
+    "ory1\020\017\022\014\n\010g_create\020\020\022\014\n\010g_disban\020\021\022\r\n\tg_"
+    "request\020\022\022\r\n\tg_listreq\020\023\022\t\n\005g_add\020\024\022\t\n\005g"
+    "_del\020\025\022\014\n\010g_search\020\026\022\r\n\tg_message\020\027\022\n\n\006g"
+    "_file\020\030\022\n\n\006g_quit\020\031\022\r\n\tg_members\020\032\022\020\n\014g_"
+    "addmanager\020\033\022\020\n\014g_delmanager\020\034\022\017\n\013g_m_hi"
+    "story\020\035\022\020\n\014g_f_history0\020\036\022\020\n\014g_f_history"
+    "1\020\037\022\020\n\014notify_u_req\020 \022\016\n\nnotify_u_m\020!\022\016\n"
+    "\nnotify_u_f\020\"\022\020\n\014notify_g_req\020#\022\016\n\nnotif"
+    "y_g_m\020$\022\016\n\nnotify_g_f\020%\022\r\n\tg_confirm\020&\022\017"
+    "\n\013fri_confirm\020\'\022\017\n\013heart_check\020(b\006proto3"
 };
 static ::absl::once_flag descriptor_table_chatroom_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_chatroom_2eproto = {
     false,
     false,
-    996,
+    1160,
     descriptor_table_protodef_chatroom_2eproto,
     "chatroom.proto",
     &descriptor_table_chatroom_2eproto_once,
     nullptr,
     0,
-    6,
+    8,
     schemas,
     file_default_instances,
     TableStruct_chatroom_2eproto::offsets,
@@ -318,9 +392,9 @@ const ::google::protobuf::EnumDescriptor* Type_descriptor() {
   return file_level_enum_descriptors_chatroom_2eproto[0];
 }
 PROTOBUF_CONSTINIT const uint32_t Type_internal_data_[] = {
-    2490368u, 0u, };
+    2686976u, 0u, };
 bool Type_IsValid(int value) {
-  return 0 <= value && value <= 37;
+  return 0 <= value && value <= 40;
 }
 // ===================================================================
 
@@ -591,6 +665,7 @@ inline PROTOBUF_NDEBUG_INLINE File::Impl_::Impl_(
         _obj_cached_byte_size_{0},
         name_{visibility, arena, from.name_},
         context_{visibility, arena, from.context_},
+        date_{visibility, arena, from.date_},
         _cached_size_{0} {}
 
 File::File(
@@ -612,6 +687,7 @@ inline PROTOBUF_NDEBUG_INLINE File::Impl_::Impl_(
         _obj_cached_byte_size_{0},
         name_{visibility, arena},
         context_{visibility, arena},
+        date_{visibility, arena},
         _cached_size_{0} {}
 
 inline void File::SharedCtor(::_pb::Arena* arena) {
@@ -637,6 +713,7 @@ PROTOBUF_NOINLINE void File::Clear() {
   _impl_.obj_.Clear();
   _impl_.name_.Clear();
   _impl_.context_.Clear();
+  _impl_.date_.Clear();
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
 }
 
@@ -648,48 +725,54 @@ const char* File::_InternalParse(
 
 
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<2, 3, 0, 26, 2> File::_table_ = {
+const ::_pbi::TcParseTable<2, 4, 0, 30, 2> File::_table_ = {
   {
     0,  // no _has_bits_
     0, // no _extensions_
     4, 24,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294967281,  // skipmap
+    4294967280,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    3,  // num_field_entries
+    4,  // num_field_entries
     0,  // num_aux_entries
     offsetof(decltype(_table_), field_names),  // no aux_entries
     &_File_default_instance_._instance,
     ::_pbi::TcParser::GenericFallback,  // fallback
   }, {{
-    // repeated bytes context = 4;
-    {::_pbi::TcParser::FastBR1,
-     {34, 63, 0, PROTOBUF_FIELD_OFFSET(File, _impl_.context_)}},
-    {::_pbi::TcParser::MiniParse, {}},
-    // repeated int32 obj = 2;
-    {::_pbi::TcParser::FastV32P1,
-     {18, 63, 0, PROTOBUF_FIELD_OFFSET(File, _impl_.obj_)}},
-    // repeated string name = 3;
+    // repeated string date = 4;
     {::_pbi::TcParser::FastUR1,
-     {26, 63, 0, PROTOBUF_FIELD_OFFSET(File, _impl_.name_)}},
+     {34, 63, 0, PROTOBUF_FIELD_OFFSET(File, _impl_.date_)}},
+    // repeated int32 obj = 1;
+    {::_pbi::TcParser::FastV32P1,
+     {10, 63, 0, PROTOBUF_FIELD_OFFSET(File, _impl_.obj_)}},
+    // repeated string name = 2;
+    {::_pbi::TcParser::FastUR1,
+     {18, 63, 0, PROTOBUF_FIELD_OFFSET(File, _impl_.name_)}},
+    // repeated bytes context = 3;
+    {::_pbi::TcParser::FastBR1,
+     {26, 63, 0, PROTOBUF_FIELD_OFFSET(File, _impl_.context_)}},
   }}, {{
     65535, 65535
   }}, {{
-    // repeated int32 obj = 2;
+    // repeated int32 obj = 1;
     {PROTOBUF_FIELD_OFFSET(File, _impl_.obj_), 0, 0,
     (0 | ::_fl::kFcRepeated | ::_fl::kPackedInt32)},
-    // repeated string name = 3;
+    // repeated string name = 2;
     {PROTOBUF_FIELD_OFFSET(File, _impl_.name_), 0, 0,
     (0 | ::_fl::kFcRepeated | ::_fl::kUtf8String | ::_fl::kRepSString)},
-    // repeated bytes context = 4;
+    // repeated bytes context = 3;
     {PROTOBUF_FIELD_OFFSET(File, _impl_.context_), 0, 0,
     (0 | ::_fl::kFcRepeated | ::_fl::kBytes | ::_fl::kRepSString)},
+    // repeated string date = 4;
+    {PROTOBUF_FIELD_OFFSET(File, _impl_.date_), 0, 0,
+    (0 | ::_fl::kFcRepeated | ::_fl::kUtf8String | ::_fl::kRepSString)},
   }},
   // no aux_entries
   {{
-    "\15\0\4\0\0\0\0\0"
+    "\15\0\4\0\4\0\0\0"
     "chatroom.File"
     "name"
+    "date"
   }},
 };
 
@@ -700,27 +783,35 @@ const ::_pbi::TcParseTable<2, 3, 0, 26, 2> File::_table_ = {
   ::uint32_t cached_has_bits = 0;
   (void)cached_has_bits;
 
-  // repeated int32 obj = 2;
+  // repeated int32 obj = 1;
   {
     int byte_size = _impl_._obj_cached_byte_size_.Get();
     if (byte_size > 0) {
       target = stream->WriteInt32Packed(
-          2, _internal_obj(), byte_size, target);
+          1, _internal_obj(), byte_size, target);
     }
   }
 
-  // repeated string name = 3;
+  // repeated string name = 2;
   for (int i = 0, n = this->_internal_name_size(); i < n; ++i) {
     const auto& s = this->_internal_name().Get(i);
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
         s.data(), static_cast<int>(s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "chatroom.File.name");
-    target = stream->WriteString(3, s, target);
+    target = stream->WriteString(2, s, target);
   }
 
-  // repeated bytes context = 4;
+  // repeated bytes context = 3;
   for (int i = 0, n = this->_internal_context_size(); i < n; ++i) {
     const auto& s = this->_internal_context().Get(i);
-    target = stream->WriteBytes(4, s, target);
+    target = stream->WriteBytes(3, s, target);
+  }
+
+  // repeated string date = 4;
+  for (int i = 0, n = this->_internal_date_size(); i < n; ++i) {
+    const auto& s = this->_internal_date().Get(i);
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+        s.data(), static_cast<int>(s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "chatroom.File.date");
+    target = stream->WriteString(4, s, target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -740,7 +831,7 @@ const ::_pbi::TcParseTable<2, 3, 0, 26, 2> File::_table_ = {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // repeated int32 obj = 2;
+  // repeated int32 obj = 1;
   {
     std::size_t data_size = ::_pbi::WireFormatLite::Int32Size(
         this->_internal_obj())
@@ -753,17 +844,23 @@ const ::_pbi::TcParseTable<2, 3, 0, 26, 2> File::_table_ = {
     ;
     total_size += tag_size + data_size;
   }
-  // repeated string name = 3;
+  // repeated string name = 2;
   total_size += 1 * ::google::protobuf::internal::FromIntSize(_internal_name().size());
   for (int i = 0, n = _internal_name().size(); i < n; ++i) {
     total_size += ::google::protobuf::internal::WireFormatLite::StringSize(
         _internal_name().Get(i));
   }
-  // repeated bytes context = 4;
+  // repeated bytes context = 3;
   total_size += 1 * ::google::protobuf::internal::FromIntSize(_internal_context().size());
   for (int i = 0, n = _internal_context().size(); i < n; ++i) {
     total_size += ::google::protobuf::internal::WireFormatLite::BytesSize(
         _internal_context().Get(i));
+  }
+  // repeated string date = 4;
+  total_size += 1 * ::google::protobuf::internal::FromIntSize(_internal_date().size());
+  for (int i = 0, n = _internal_date().size(); i < n; ++i) {
+    total_size += ::google::protobuf::internal::WireFormatLite::StringSize(
+        _internal_date().Get(i));
   }
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
@@ -787,6 +884,7 @@ void File::MergeImpl(::google::protobuf::Message& to_msg, const ::google::protob
   _this->_internal_mutable_obj()->MergeFrom(from._internal_obj());
   _this->_internal_mutable_name()->MergeFrom(from._internal_name());
   _this->_internal_mutable_context()->MergeFrom(from._internal_context());
+  _this->_internal_mutable_date()->MergeFrom(from._internal_date());
   _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
 }
 
@@ -810,6 +908,7 @@ void File::InternalSwap(File* PROTOBUF_RESTRICT other) {
   _impl_.obj_.InternalSwap(&other->_impl_.obj_);
   _impl_.name_.InternalSwap(&other->_impl_.name_);
   _impl_.context_.InternalSwap(&other->_impl_.context_);
+  _impl_.date_.InternalSwap(&other->_impl_.date_);
 }
 
 ::google::protobuf::Metadata File::GetMetadata() const {
@@ -834,6 +933,7 @@ inline PROTOBUF_NDEBUG_INLINE Message::Impl_::Impl_(
       : obj_{visibility, arena, from.obj_},
         _obj_cached_byte_size_{0},
         context_{visibility, arena, from.context_},
+        date_{visibility, arena, from.date_},
         _cached_size_{0} {}
 
 Message::Message(
@@ -854,6 +954,7 @@ inline PROTOBUF_NDEBUG_INLINE Message::Impl_::Impl_(
       : obj_{visibility, arena},
         _obj_cached_byte_size_{0},
         context_{visibility, arena},
+        date_{visibility, arena},
         _cached_size_{0} {}
 
 inline void Message::SharedCtor(::_pb::Arena* arena) {
@@ -878,6 +979,7 @@ PROTOBUF_NOINLINE void Message::Clear() {
 
   _impl_.obj_.Clear();
   _impl_.context_.Clear();
+  _impl_.date_.Clear();
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
 }
 
@@ -889,41 +991,49 @@ const char* Message::_InternalParse(
 
 
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<1, 2, 0, 32, 2> Message::_table_ = {
+const ::_pbi::TcParseTable<2, 3, 0, 36, 2> Message::_table_ = {
   {
     0,  // no _has_bits_
     0, // no _extensions_
-    3, 8,  // max_field_number, fast_idx_mask
+    3, 24,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294967289,  // skipmap
+    4294967288,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    2,  // num_field_entries
+    3,  // num_field_entries
     0,  // num_aux_entries
     offsetof(decltype(_table_), field_names),  // no aux_entries
     &_Message_default_instance_._instance,
     ::_pbi::TcParser::GenericFallback,  // fallback
   }, {{
-    // repeated int32 obj = 2;
+    {::_pbi::TcParser::MiniParse, {}},
+    // repeated int32 obj = 1;
     {::_pbi::TcParser::FastV32P1,
-     {18, 63, 0, PROTOBUF_FIELD_OFFSET(Message, _impl_.obj_)}},
-    // repeated string context = 3;
+     {10, 63, 0, PROTOBUF_FIELD_OFFSET(Message, _impl_.obj_)}},
+    // repeated string context = 2;
     {::_pbi::TcParser::FastUR1,
-     {26, 63, 0, PROTOBUF_FIELD_OFFSET(Message, _impl_.context_)}},
+     {18, 63, 0, PROTOBUF_FIELD_OFFSET(Message, _impl_.context_)}},
+    // repeated string date = 3;
+    {::_pbi::TcParser::FastUR1,
+     {26, 63, 0, PROTOBUF_FIELD_OFFSET(Message, _impl_.date_)}},
   }}, {{
     65535, 65535
   }}, {{
-    // repeated int32 obj = 2;
+    // repeated int32 obj = 1;
     {PROTOBUF_FIELD_OFFSET(Message, _impl_.obj_), 0, 0,
     (0 | ::_fl::kFcRepeated | ::_fl::kPackedInt32)},
-    // repeated string context = 3;
+    // repeated string context = 2;
     {PROTOBUF_FIELD_OFFSET(Message, _impl_.context_), 0, 0,
+    (0 | ::_fl::kFcRepeated | ::_fl::kUtf8String | ::_fl::kRepSString)},
+    // repeated string date = 3;
+    {PROTOBUF_FIELD_OFFSET(Message, _impl_.date_), 0, 0,
     (0 | ::_fl::kFcRepeated | ::_fl::kUtf8String | ::_fl::kRepSString)},
   }},
   // no aux_entries
   {{
-    "\20\0\7\0\0\0\0\0"
+    "\20\0\7\4\0\0\0\0"
     "chatroom.Message"
     "context"
+    "date"
   }},
 };
 
@@ -934,20 +1044,28 @@ const ::_pbi::TcParseTable<1, 2, 0, 32, 2> Message::_table_ = {
   ::uint32_t cached_has_bits = 0;
   (void)cached_has_bits;
 
-  // repeated int32 obj = 2;
+  // repeated int32 obj = 1;
   {
     int byte_size = _impl_._obj_cached_byte_size_.Get();
     if (byte_size > 0) {
       target = stream->WriteInt32Packed(
-          2, _internal_obj(), byte_size, target);
+          1, _internal_obj(), byte_size, target);
     }
   }
 
-  // repeated string context = 3;
+  // repeated string context = 2;
   for (int i = 0, n = this->_internal_context_size(); i < n; ++i) {
     const auto& s = this->_internal_context().Get(i);
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
         s.data(), static_cast<int>(s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "chatroom.Message.context");
+    target = stream->WriteString(2, s, target);
+  }
+
+  // repeated string date = 3;
+  for (int i = 0, n = this->_internal_date_size(); i < n; ++i) {
+    const auto& s = this->_internal_date().Get(i);
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+        s.data(), static_cast<int>(s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "chatroom.Message.date");
     target = stream->WriteString(3, s, target);
   }
 
@@ -968,7 +1086,7 @@ const ::_pbi::TcParseTable<1, 2, 0, 32, 2> Message::_table_ = {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // repeated int32 obj = 2;
+  // repeated int32 obj = 1;
   {
     std::size_t data_size = ::_pbi::WireFormatLite::Int32Size(
         this->_internal_obj())
@@ -981,11 +1099,17 @@ const ::_pbi::TcParseTable<1, 2, 0, 32, 2> Message::_table_ = {
     ;
     total_size += tag_size + data_size;
   }
-  // repeated string context = 3;
+  // repeated string context = 2;
   total_size += 1 * ::google::protobuf::internal::FromIntSize(_internal_context().size());
   for (int i = 0, n = _internal_context().size(); i < n; ++i) {
     total_size += ::google::protobuf::internal::WireFormatLite::StringSize(
         _internal_context().Get(i));
+  }
+  // repeated string date = 3;
+  total_size += 1 * ::google::protobuf::internal::FromIntSize(_internal_date().size());
+  for (int i = 0, n = _internal_date().size(); i < n; ++i) {
+    total_size += ::google::protobuf::internal::WireFormatLite::StringSize(
+        _internal_date().Get(i));
   }
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
@@ -1008,6 +1132,7 @@ void Message::MergeImpl(::google::protobuf::Message& to_msg, const ::google::pro
 
   _this->_internal_mutable_obj()->MergeFrom(from._internal_obj());
   _this->_internal_mutable_context()->MergeFrom(from._internal_context());
+  _this->_internal_mutable_date()->MergeFrom(from._internal_date());
   _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
 }
 
@@ -1030,6 +1155,7 @@ void Message::InternalSwap(Message* PROTOBUF_RESTRICT other) {
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   _impl_.obj_.InternalSwap(&other->_impl_.obj_);
   _impl_.context_.InternalSwap(&other->_impl_.context_);
+  _impl_.date_.InternalSwap(&other->_impl_.date_);
 }
 
 ::google::protobuf::Metadata Message::GetMetadata() const {
@@ -1554,6 +1680,245 @@ void Login_info::InternalSwap(Login_info* PROTOBUF_RESTRICT other) {
 }
 // ===================================================================
 
+class Group_uid::_Internal {
+ public:
+  using HasBits = decltype(std::declval<Group_uid>()._impl_._has_bits_);
+  static constexpr ::int32_t kHasBitsOffset =
+    8 * PROTOBUF_FIELD_OFFSET(Group_uid, _impl_._has_bits_);
+  static void set_has_uid(HasBits* has_bits) {
+    (*has_bits)[0] |= 2u;
+  }
+  static void set_has_name(HasBits* has_bits) {
+    (*has_bits)[0] |= 1u;
+  }
+};
+
+Group_uid::Group_uid(::google::protobuf::Arena* arena)
+    : ::google::protobuf::Message(arena) {
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:chatroom.Group_uid)
+}
+inline PROTOBUF_NDEBUG_INLINE Group_uid::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
+    const Impl_& from)
+      : _has_bits_{from._has_bits_},
+        _cached_size_{0},
+        name_(arena, from.name_) {}
+
+Group_uid::Group_uid(
+    ::google::protobuf::Arena* arena,
+    const Group_uid& from)
+    : ::google::protobuf::Message(arena) {
+  Group_uid* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_);
+  _impl_.uid_ = from._impl_.uid_;
+
+  // @@protoc_insertion_point(copy_constructor:chatroom.Group_uid)
+}
+inline PROTOBUF_NDEBUG_INLINE Group_uid::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility,
+    ::google::protobuf::Arena* arena)
+      : _cached_size_{0},
+        name_(arena) {}
+
+inline void Group_uid::SharedCtor(::_pb::Arena* arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+  _impl_.uid_ = {};
+}
+Group_uid::~Group_uid() {
+  // @@protoc_insertion_point(destructor:chatroom.Group_uid)
+  _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  SharedDtor();
+}
+inline void Group_uid::SharedDtor() {
+  ABSL_DCHECK(GetArena() == nullptr);
+  _impl_.name_.Destroy();
+  _impl_.~Impl_();
+}
+
+PROTOBUF_NOINLINE void Group_uid::Clear() {
+// @@protoc_insertion_point(message_clear_start:chatroom.Group_uid)
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  cached_has_bits = _impl_._has_bits_[0];
+  if (cached_has_bits & 0x00000001u) {
+    _impl_.name_.ClearNonDefaultToEmpty();
+  }
+  _impl_.uid_ = 0;
+  _impl_._has_bits_.Clear();
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
+}
+
+const char* Group_uid::_InternalParse(
+    const char* ptr, ::_pbi::ParseContext* ctx) {
+  ptr = ::_pbi::TcParser::ParseLoop(this, ptr, ctx, &_table_.header);
+  return ptr;
+}
+
+
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<1, 2, 0, 31, 2> Group_uid::_table_ = {
+  {
+    PROTOBUF_FIELD_OFFSET(Group_uid, _impl_._has_bits_),
+    0, // no _extensions_
+    2, 8,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967292,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    2,  // num_field_entries
+    0,  // num_aux_entries
+    offsetof(decltype(_table_), field_names),  // no aux_entries
+    &_Group_uid_default_instance_._instance,
+    ::_pbi::TcParser::GenericFallback,  // fallback
+  }, {{
+    // optional string name = 2;
+    {::_pbi::TcParser::FastUS1,
+     {18, 0, 0, PROTOBUF_FIELD_OFFSET(Group_uid, _impl_.name_)}},
+    // optional int32 uid = 1;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(Group_uid, _impl_.uid_), 1>(),
+     {8, 1, 0, PROTOBUF_FIELD_OFFSET(Group_uid, _impl_.uid_)}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // optional int32 uid = 1;
+    {PROTOBUF_FIELD_OFFSET(Group_uid, _impl_.uid_), _Internal::kHasBitsOffset + 1, 0,
+    (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
+    // optional string name = 2;
+    {PROTOBUF_FIELD_OFFSET(Group_uid, _impl_.name_), _Internal::kHasBitsOffset + 0, 0,
+    (0 | ::_fl::kFcOptional | ::_fl::kUtf8String | ::_fl::kRepAString)},
+  }},
+  // no aux_entries
+  {{
+    "\22\0\4\0\0\0\0\0"
+    "chatroom.Group_uid"
+    "name"
+  }},
+};
+
+::uint8_t* Group_uid::_InternalSerialize(
+    ::uint8_t* target,
+    ::google::protobuf::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:chatroom.Group_uid)
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
+
+  cached_has_bits = _impl_._has_bits_[0];
+  // optional int32 uid = 1;
+  if (cached_has_bits & 0x00000002u) {
+    target = ::google::protobuf::internal::WireFormatLite::
+        WriteInt32ToArrayWithField<1>(
+            stream, this->_internal_uid(), target);
+  }
+
+  // optional string name = 2;
+  if (cached_has_bits & 0x00000001u) {
+    const std::string& _s = this->_internal_name();
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+        _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "chatroom.Group_uid.name");
+    target = stream->WriteStringMaybeAliased(2, _s, target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target =
+        ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+            _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:chatroom.Group_uid)
+  return target;
+}
+
+::size_t Group_uid::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:chatroom.Group_uid)
+  ::size_t total_size = 0;
+
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  cached_has_bits = _impl_._has_bits_[0];
+  if (cached_has_bits & 0x00000003u) {
+    // optional string name = 2;
+    if (cached_has_bits & 0x00000001u) {
+      total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                      this->_internal_name());
+    }
+
+    // optional int32 uid = 1;
+    if (cached_has_bits & 0x00000002u) {
+      total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+          this->_internal_uid());
+    }
+
+  }
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
+}
+
+const ::google::protobuf::Message::ClassData Group_uid::_class_data_ = {
+    Group_uid::MergeImpl,
+    nullptr,  // OnDemandRegisterArenaDtor
+};
+const ::google::protobuf::Message::ClassData* Group_uid::GetClassData() const {
+  return &_class_data_;
+}
+
+void Group_uid::MergeImpl(::google::protobuf::Message& to_msg, const ::google::protobuf::Message& from_msg) {
+  auto* const _this = static_cast<Group_uid*>(&to_msg);
+  auto& from = static_cast<const Group_uid&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:chatroom.Group_uid)
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  cached_has_bits = from._impl_._has_bits_[0];
+  if (cached_has_bits & 0x00000003u) {
+    if (cached_has_bits & 0x00000001u) {
+      _this->_internal_set_name(from._internal_name());
+    }
+    if (cached_has_bits & 0x00000002u) {
+      _this->_impl_.uid_ = from._impl_.uid_;
+    }
+    _this->_impl_._has_bits_[0] |= cached_has_bits;
+  }
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void Group_uid::CopyFrom(const Group_uid& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:chatroom.Group_uid)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+PROTOBUF_NOINLINE bool Group_uid::IsInitialized() const {
+  return true;
+}
+
+::_pbi::CachedSize* Group_uid::AccessCachedSize() const {
+  return &_impl_._cached_size_;
+}
+void Group_uid::InternalSwap(Group_uid* PROTOBUF_RESTRICT other) {
+  using std::swap;
+  auto* arena = GetArena();
+  ABSL_DCHECK_EQ(arena, other->GetArena());
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.name_, &other->_impl_.name_, arena);
+        swap(_impl_.uid_, other->_impl_.uid_);
+}
+
+::google::protobuf::Metadata Group_uid::GetMetadata() const {
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_chatroom_2eproto_getter, &descriptor_table_chatroom_2eproto_once,
+      file_level_metadata_chatroom_2eproto[5]);
+}
+// ===================================================================
+
 class IDs::_Internal {
  public:
 };
@@ -1625,9 +1990,9 @@ const ::_pbi::TcParseTable<0, 1, 0, 0, 2> IDs::_table_ = {
   {
     0,  // no _has_bits_
     0, // no _extensions_
-    2, 0,  // max_field_number, fast_idx_mask
+    1, 0,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294967293,  // skipmap
+    4294967294,  // skipmap
     offsetof(decltype(_table_), field_entries),
     1,  // num_field_entries
     0,  // num_aux_entries
@@ -1635,13 +2000,13 @@ const ::_pbi::TcParseTable<0, 1, 0, 0, 2> IDs::_table_ = {
     &_IDs_default_instance_._instance,
     ::_pbi::TcParser::GenericFallback,  // fallback
   }, {{
-    // repeated int32 id = 2;
+    // repeated int32 id = 1;
     {::_pbi::TcParser::FastV32P1,
-     {18, 63, 0, PROTOBUF_FIELD_OFFSET(IDs, _impl_.id_)}},
+     {10, 63, 0, PROTOBUF_FIELD_OFFSET(IDs, _impl_.id_)}},
   }}, {{
     65535, 65535
   }}, {{
-    // repeated int32 id = 2;
+    // repeated int32 id = 1;
     {PROTOBUF_FIELD_OFFSET(IDs, _impl_.id_), 0, 0,
     (0 | ::_fl::kFcRepeated | ::_fl::kPackedInt32)},
   }},
@@ -1657,12 +2022,12 @@ const ::_pbi::TcParseTable<0, 1, 0, 0, 2> IDs::_table_ = {
   ::uint32_t cached_has_bits = 0;
   (void)cached_has_bits;
 
-  // repeated int32 id = 2;
+  // repeated int32 id = 1;
   {
     int byte_size = _impl_._id_cached_byte_size_.Get();
     if (byte_size > 0) {
       target = stream->WriteInt32Packed(
-          2, _internal_id(), byte_size, target);
+          1, _internal_id(), byte_size, target);
     }
   }
 
@@ -1683,7 +2048,7 @@ const ::_pbi::TcParseTable<0, 1, 0, 0, 2> IDs::_table_ = {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // repeated int32 id = 2;
+  // repeated int32 id = 1;
   {
     std::size_t data_size = ::_pbi::WireFormatLite::Int32Size(
         this->_internal_id())
@@ -1742,7 +2107,192 @@ void IDs::InternalSwap(IDs* PROTOBUF_RESTRICT other) {
 ::google::protobuf::Metadata IDs::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_chatroom_2eproto_getter, &descriptor_table_chatroom_2eproto_once,
-      file_level_metadata_chatroom_2eproto[5]);
+      file_level_metadata_chatroom_2eproto[6]);
+}
+// ===================================================================
+
+class Strs::_Internal {
+ public:
+};
+
+Strs::Strs(::google::protobuf::Arena* arena)
+    : ::google::protobuf::Message(arena) {
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:chatroom.Strs)
+}
+inline PROTOBUF_NDEBUG_INLINE Strs::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
+    const Impl_& from)
+      : str_{visibility, arena, from.str_},
+        _cached_size_{0} {}
+
+Strs::Strs(
+    ::google::protobuf::Arena* arena,
+    const Strs& from)
+    : ::google::protobuf::Message(arena) {
+  Strs* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_);
+
+  // @@protoc_insertion_point(copy_constructor:chatroom.Strs)
+}
+inline PROTOBUF_NDEBUG_INLINE Strs::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility,
+    ::google::protobuf::Arena* arena)
+      : str_{visibility, arena},
+        _cached_size_{0} {}
+
+inline void Strs::SharedCtor(::_pb::Arena* arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+}
+Strs::~Strs() {
+  // @@protoc_insertion_point(destructor:chatroom.Strs)
+  _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  SharedDtor();
+}
+inline void Strs::SharedDtor() {
+  ABSL_DCHECK(GetArena() == nullptr);
+  _impl_.~Impl_();
+}
+
+PROTOBUF_NOINLINE void Strs::Clear() {
+// @@protoc_insertion_point(message_clear_start:chatroom.Strs)
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  _impl_.str_.Clear();
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
+}
+
+const char* Strs::_InternalParse(
+    const char* ptr, ::_pbi::ParseContext* ctx) {
+  ptr = ::_pbi::TcParser::ParseLoop(this, ptr, ctx, &_table_.header);
+  return ptr;
+}
+
+
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<0, 1, 0, 25, 2> Strs::_table_ = {
+  {
+    0,  // no _has_bits_
+    0, // no _extensions_
+    1, 0,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967294,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    1,  // num_field_entries
+    0,  // num_aux_entries
+    offsetof(decltype(_table_), field_names),  // no aux_entries
+    &_Strs_default_instance_._instance,
+    ::_pbi::TcParser::GenericFallback,  // fallback
+  }, {{
+    // repeated string str = 1;
+    {::_pbi::TcParser::FastUR1,
+     {10, 63, 0, PROTOBUF_FIELD_OFFSET(Strs, _impl_.str_)}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // repeated string str = 1;
+    {PROTOBUF_FIELD_OFFSET(Strs, _impl_.str_), 0, 0,
+    (0 | ::_fl::kFcRepeated | ::_fl::kUtf8String | ::_fl::kRepSString)},
+  }},
+  // no aux_entries
+  {{
+    "\15\3\0\0\0\0\0\0"
+    "chatroom.Strs"
+    "str"
+  }},
+};
+
+::uint8_t* Strs::_InternalSerialize(
+    ::uint8_t* target,
+    ::google::protobuf::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:chatroom.Strs)
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
+
+  // repeated string str = 1;
+  for (int i = 0, n = this->_internal_str_size(); i < n; ++i) {
+    const auto& s = this->_internal_str().Get(i);
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+        s.data(), static_cast<int>(s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "chatroom.Strs.str");
+    target = stream->WriteString(1, s, target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target =
+        ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+            _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:chatroom.Strs)
+  return target;
+}
+
+::size_t Strs::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:chatroom.Strs)
+  ::size_t total_size = 0;
+
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // repeated string str = 1;
+  total_size += 1 * ::google::protobuf::internal::FromIntSize(_internal_str().size());
+  for (int i = 0, n = _internal_str().size(); i < n; ++i) {
+    total_size += ::google::protobuf::internal::WireFormatLite::StringSize(
+        _internal_str().Get(i));
+  }
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
+}
+
+const ::google::protobuf::Message::ClassData Strs::_class_data_ = {
+    Strs::MergeImpl,
+    nullptr,  // OnDemandRegisterArenaDtor
+};
+const ::google::protobuf::Message::ClassData* Strs::GetClassData() const {
+  return &_class_data_;
+}
+
+void Strs::MergeImpl(::google::protobuf::Message& to_msg, const ::google::protobuf::Message& from_msg) {
+  auto* const _this = static_cast<Strs*>(&to_msg);
+  auto& from = static_cast<const Strs&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:chatroom.Strs)
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  _this->_internal_mutable_str()->MergeFrom(from._internal_str());
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void Strs::CopyFrom(const Strs& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:chatroom.Strs)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+PROTOBUF_NOINLINE bool Strs::IsInitialized() const {
+  return true;
+}
+
+::_pbi::CachedSize* Strs::AccessCachedSize() const {
+  return &_impl_._cached_size_;
+}
+void Strs::InternalSwap(Strs* PROTOBUF_RESTRICT other) {
+  using std::swap;
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  _impl_.str_.InternalSwap(&other->_impl_.str_);
+}
+
+::google::protobuf::Metadata Strs::GetMetadata() const {
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_chatroom_2eproto_getter, &descriptor_table_chatroom_2eproto_once,
+      file_level_metadata_chatroom_2eproto[7]);
 }
 // @@protoc_insertion_point(namespace_scope)
 }  // namespace chatroom

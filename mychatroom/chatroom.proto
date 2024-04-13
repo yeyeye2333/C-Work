@@ -28,7 +28,7 @@ enum Type{
     g_file = 24;
     g_quit = 25;
     g_members = 26;
-    g_addmannager = 27;
+    g_addmanager = 27;
     g_delmanager = 28;
     g_m_history = 29;
     g_f_history0 = 30;
@@ -39,6 +39,9 @@ enum Type{
     notify_g_req = 35;
     notify_g_m = 36;
     notify_g_f = 37;
+    g_confirm=38;
+    fri_confirm=39;
+    heart_check=40;
 }
 message Head{
     optional bool is=1;
@@ -49,10 +52,12 @@ message File{
     repeated int32 obj=1;
     repeated string name=2;
     repeated bytes context=3;
+    repeated string date=4;
 }
 message Message{
     repeated int32 obj=1;
     repeated string context=2;
+    repeated string date=3;
 }
 message Signup_info{
     optional int32 uid=1;
@@ -61,8 +66,15 @@ message Signup_info{
 }
 message Login_info{
     optional int32 uid=1;
-    optional string password=2; 
+    optional string password=2;
+}
+message Group_uid{
+    optional int32 uid=1;
+    optional string name=2;
 }
 message IDs{
     repeated int32 id=1;
+}
+message Strs{
+    repeated string str=1;
 }

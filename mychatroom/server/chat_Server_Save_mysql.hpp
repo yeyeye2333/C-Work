@@ -21,7 +21,7 @@ public:
         if(res==nullptr)return 0;
         else
         {
-            mysql_num_fields(res.get());
+            return mysql_num_fields(res.get());
         }
     }
     std::vector<string> getrow()

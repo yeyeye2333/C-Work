@@ -17,10 +17,10 @@ protected:
 template<typename T>
 class Task:public TaskQueue<T>{
 public:
-    explicit Task(unsigned int val=-1):TaskQueue<T>(val),ulock(mtx,std::defer_lock){}
+    explicit Task(unsigned int val=-1):TaskQueue<T>(val){}
     bool push(T val)
     {
-        ulock.lock();
+        std::unique_lock<std::mutex> ulock(mtx);
         if(cur<this->capacity)
         {
             que.push(val);
@@ -36,7 +36,7 @@ public:
     }
     T pop()
     {
-        ulock.lock();   
+        std::unique_lock<std::mutex> ulock(mtx);
         if(cur==0)
         {
             ulock.unlock();
@@ -60,7 +60,6 @@ private:
     std::queue<T> que;
     unsigned int cur=0;
     std::mutex mtx;
-    std::unique_lock<std::mutex> ulock;
 };
 
 #endif

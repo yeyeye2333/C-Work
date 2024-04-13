@@ -10,11 +10,23 @@
 #include<tuple>
 using std::string;
 using chatroom::Type;
+#define pr printf("=========================================================================\n")
 
 class Clannel{
 public:
     Clannel(int _fd):fd(_fd),ulock(mtx,std::defer_lock){}
+    void chfd(int _fd)
+    {
+        fd=_fd;
+    }
+    bool ret()
+    {
+        return recv_ret;
+    }
     ~Clannel(){}
+    static int uid;
+    static int in_uid;
+    static int in_gid;
 protected:
     int fd=-1;
     static bool send_continue;
@@ -26,6 +38,9 @@ protected:
 std::mutex Clannel::mtx;
 bool Clannel::send_continue=0;
 bool Clannel::recv_ret=0;
+int Clannel::uid=0;
+int Clannel::in_uid=0;
+int Clannel::in_gid=0;
 
 
 
@@ -33,10 +48,10 @@ void set_Head(string*s_ptr,Type type,int len)
 {
     chatroom::Head _Head;
     _Head.set_len(len);
-    _Head.set_type(Type::login);
+    _Head.set_type(type);
     _Head.SerializeToString(s_ptr);
 }
-void set_File(string*s_ptr,const std::vector<int> &obj,const std::vector<string>& name,const std::vector<string>& context)
+void set_File(string*s_ptr,const std::vector<int> &obj,const std::vector<string>& name,const std::vector<string>& context={})
 {
     chatroom::File _File;
     for(auto &tmp:obj)_File.add_obj(tmp);
@@ -57,10 +72,9 @@ void set_IDs(string*s_ptr,const std::vector<int>&id)
     for(auto &tmp:id)_IDs.add_id(tmp);
     _IDs.SerializePartialToString(s_ptr);
 }
-void set_Signup_info(string*s_ptr,const int& uid,const string&name,const string&password)
+void set_Signup_info(string*s_ptr,const string&name,const string&password)
 {
     chatroom::Signup_info _Signup;
-    _Signup.set_uid(uid);
     _Signup.set_name(name);
     _Signup.set_password(password);
     _Signup.SerializePartialToString(s_ptr);
@@ -71,6 +85,13 @@ void set_Login_info(string*s_ptr,const int&uid,const string&password)
     _Login.set_uid(uid);
     _Login.set_password(password);
     _Login.SerializePartialToString(s_ptr);
+}
+void set_Group_uid(string*s_ptr,const int&uid,const string&name="")
+{
+    chatroom::Group_uid _Group;
+    _Group.set_uid(uid);
+    _Group.set_name(name);
+    _Group.SerializePartialToString(s_ptr);
 }
 
 #endif

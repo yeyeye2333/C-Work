@@ -1,10 +1,10 @@
 #ifndef chat_Server_Save
 #define chat_Server_Save
 
-#include"chat_Server_Save_mysql.h"
-#include"chat_Server_Save_redis.h"
-#include"chat_Server_Clannel.h"
-#include"chat_Server.h"
+#include"chat_Server_Save_mysql.hpp"
+#include"chat_Server_Save_redis.hpp"
+#include<vector>
+#include<string>
 #include<mutex>
 #define maxu_messages 100
 #define maxu_files 3
@@ -12,7 +12,9 @@
 #define maxg_messages 1000
 #define maxg_files 10
 #define maxfile 65535
+extern char cur_time[20];
 
+using std::string;
 class Save{
 public:
     Save():ulock(mtx,std::defer_lock)
@@ -75,15 +77,22 @@ public:
         std::vector<string> res;
         auto tmp=save_mysql.s_f_wh_or("uid,fri_uid,blok,mess_num,file_num,has_mess","u_relation",
                             "fri_uid="+std::to_string(uid)+" and has_mess=1");
+        update_u_relation("",std::to_string(uid),"","","","0");
         for(auto tmp2=tmp.getrow();tmp2.size();tmp2=tmp.getrow())
         {
-            res.push_back(tmp2[5]);
+            res.push_back(tmp2[0]);
         }
         return res;
     }
     bool fri_confirm(int uid,int fri_uid)
     {
         if(select_u_relation(std::to_string(uid),std::to_string(fri_uid)).col_num()!=0)return 1;
+        return 0;
+    }
+    bool g_confirm(int uid,int gid)
+    {
+        if(select_g_memebers_gid(std::to_string(gid),std::to_string(uid)).col_num()!=0)return 1;
+        return 0;
     }
 
     bool login(int uid,const string& password)
@@ -223,39 +232,45 @@ public:
     {
         std::vector<string> tmp1;
         std::vector<string> tmp2;
+        std::vector<string> tmp3;
         auto res=select_u_messages(std::to_string(uid),std::to_string(fri_uid));
         for(auto tmp=res.getrow();tmp.size()!=0;tmp=res.getrow())
         {
             tmp1.push_back(tmp[2]);
             tmp2.push_back(tmp[3]);
+            tmp3.push_back(tmp[0]);
         }
-        return {tmp1,tmp2};
+        return {tmp3,tmp1,tmp2};
     }
     std::vector<std::vector<string>> u_f_history0(int uid,int fri_uid)
     {
         std::vector<string> tmp1;
         std::vector<string> tmp2;
+        std::vector<string> tmp3;
         auto res=select_u_files(std::to_string(uid),std::to_string(fri_uid));
         for(auto tmp=res.getrow();tmp.size()!=0;tmp=res.getrow())
         {
-            tmp1.push_back(tmp[2]);
+            tmp1.push_back(tmp[4]);
             tmp2.push_back(tmp[3]);
+            tmp3.push_back(tmp[0]);
         }
-        return {tmp2,tmp1};
+        return {tmp3,tmp1,tmp2};
     }
     std::vector<std::vector<string>> u_f_history1(int uid,int fri_uid,const string&file_name)
     {
         std::vector<string> tmp1;
         std::vector<string> tmp2;
         std::vector<string> tmp3;
+        std::vector<string> tmp4;
         auto res=select_u_files(std::to_string(uid),std::to_string(fri_uid),file_name);
         for(auto tmp=res.getrow();tmp.size()!=0;tmp=res.getrow())
         {
             tmp1.push_back(tmp[2]);
             tmp2.push_back(tmp[3]);
             tmp3.push_back(tmp[4]);
+            tmp4.push_back(tmp[0]);
         }
-        return {tmp3,tmp1,tmp2};
+        return {tmp4,tmp3,tmp1,tmp2};
     }
     int g_create(int uid,string g_name)
     {
@@ -324,15 +339,18 @@ public:
         }
         return res;
     }
-    std::vector<string> g_search(int uid)
+    std::vector<std::vector<string>> g_search(int uid)
     {
-        std::vector<string> res;
-        auto tmp=select_g_memebers_uid(std::to_string(uid));
+        std::vector<string> res1;
+        std::vector<string> res2;
+        auto tmp=save_mysql.s_f_wh_or("g_members.gid,group_name","g_members,g_info",
+                                    "g_members.gid=g_info.gid and g_members.uid="+std::to_string(uid));
         for(auto tmp2=tmp.getrow();tmp2.size()!=0;tmp2=tmp.getrow())
         {
-            res.push_back(tmp2[0]);
+            res1.push_back(tmp2[0]);
+            res2.push_back(tmp2[1]);
         }
-        return res;
+        return {res1,res2};
     }
     bool g_message(int uid,int gid,const string&message)
     {
@@ -389,7 +407,7 @@ public:
         }
         return {res1,res2};
     }
-    bool g_addmannager(int uid,int gid,int manager)
+    bool g_addmanager(int uid,int gid,int manager)
     {
         if(std::stoi(select_g_info(std::to_string(gid)).getrow()[1])==uid&&
             select_g_memebers_gid(std::to_string(gid),std::to_string(manager)).col_num()!=0)
@@ -411,33 +429,38 @@ public:
     {
         std::vector<string> tmp1;
         std::vector<string> tmp2;
+        std::vector<string> tmp3;
         if(select_g_memebers_gid(std::to_string(gid),std::to_string(uid)).col_num()==0)return {tmp1,tmp2};
         auto res=select_g_messages(std::to_string(gid));
         for(auto tmp=res.getrow();tmp.size()!=0;tmp=res.getrow())
         {
             tmp1.push_back(tmp[2]);
             tmp2.push_back(tmp[3]);
+            tmp3.push_back(tmp[0]);
         }
-        return {tmp1,tmp2};
+        return {tmp3,tmp1,tmp2};
     }
     std::vector<std::vector<string>> g_f_history0(int uid,int gid)
     {
         std::vector<string> tmp1;
         std::vector<string> tmp2;
+        std::vector<string> tmp3;
         if(select_g_memebers_gid(std::to_string(gid),std::to_string(uid)).col_num()==0)return {tmp1,tmp2};
         auto res=select_g_files(std::to_string(gid));
         for(auto tmp=res.getrow();tmp.size()!=0;tmp=res.getrow())
         {
-            tmp1.push_back(tmp[2]);
+            tmp1.push_back(tmp[4]);
             tmp2.push_back(tmp[3]);
+            tmp3.push_back(tmp[0]);
         }
-        return {tmp2,tmp1};
+        return {tmp3,tmp2,tmp1};
     }
     std::vector<std::vector<string>> g_f_history1(int uid,int gid,const string&file_name)
     {
         std::vector<string> tmp1;
         std::vector<string> tmp2;
         std::vector<string> tmp3;
+        std::vector<string> tmp4;
         if(select_g_memebers_gid(std::to_string(gid),std::to_string(uid)).col_num()==0)return {tmp1,tmp2,tmp3};
         auto res=select_g_files(std::to_string(gid),file_name);
         for(auto tmp=res.getrow();tmp.size()!=0;tmp=res.getrow())
@@ -445,8 +468,9 @@ public:
             tmp1.push_back(tmp[2]);
             tmp2.push_back(tmp[3]);
             tmp3.push_back(tmp[4]);
+            tmp4.push_back(tmp[0]);
         }
-        return {tmp3,tmp1,tmp2};
+        return {tmp4,tmp3,tmp1,tmp2};
     }
 private:
     //user
@@ -554,7 +578,7 @@ private:
         }
         return save_mysql.up_set_wh("u_info",res,"uid="+uid);
     }
-    bool update_u_relation(const string& uid,const string& fri_uid,const string&blok="",const string&mess_num="",const string&file_num="",const string&has_mess="")
+    bool update_u_relation(const string& uid="",const string& fri_uid="",const string&blok="",const string&mess_num="",const string&file_num="",const string&has_mess="")
     {
         string res;
         bool is=0;
@@ -580,6 +604,7 @@ private:
             if(is==1)res+=",";
             res += "has_mess=" + has_mess;
         }
+        if(uid.size()==0)return save_mysql.up_set_wh("u_relation",res,"fri_uid="+fri_uid);
         return save_mysql.up_set_wh("u_relation", res,"uid="+uid+" and fri_uid="+fri_uid);
     }
 
