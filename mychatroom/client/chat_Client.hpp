@@ -46,6 +46,16 @@ void Client::initial()
             pr;
             std::cout<<"1.登录\t2.注册\t3.注销\t(按\"q/Q\"退出)\n选择:";
             std::cin>>tmp;
+            if(std::cin.eof())
+            {
+                std::cin.ignore();
+                tmp="q";
+            }
+            if(std::cin.fail())
+            {
+                std::cin.ignore();
+                std::cin.clear();
+            }
         }while(tmp.size()==0);
         int uid;
         string name;
@@ -53,6 +63,7 @@ void Client::initial()
         switch (tmp[0])
         {
             case 'q':case 'Q':
+                close(fd);
                 exit(EXIT_SUCCESS);
                 break;
             
@@ -88,7 +99,7 @@ void Client::initial()
 }
 void Client::mainUI()
 {
-    std::cout<<"Welcome "<<tosend.uid<<std::endl;
+    std::cout<<"(Welcome 你的uid为\""<<tosend.uid<<"\")"<<std::endl;
     string tmp;
     do{
         tmp="";
@@ -97,6 +108,16 @@ void Client::mainUI()
             std::cout<<"1.查看已有好友\t2.加好友\t3.删好友\t4.查看好友申请\t5.与好友聊天\n"
                     "6.查看已进群聊\t7.创建群聊\t8.解散群聊\t9.加群\t10.进入群聊\t(按\"q/Q\"退出)\n选择:";
             std::cin>>tmp;
+            if(std::cin.eof())
+            {
+                std::cin.ignore();
+                tmp="q";
+            }
+            if(std::cin.fail())
+            {
+                std::cin.ignore();
+                std::cin.clear();
+            }
         }while(tmp.size()==0);
         int id;
         string name;
@@ -181,11 +202,21 @@ void Client::userUI()
     do{
         tmp="";
         do{
-            std::cout<<"正在和"<<tosend.in_uid<<"聊天"<<std::endl;
+            std::cout<<"(正在和\""<<tosend.in_uid<<"\"聊天)"<<std::endl;
             pr;
             std::cout<<"1.发送消息\t2.发送文件\t3.屏蔽对方\t4.解除屏蔽\n"
                 "5.查询消息历史\t6.查询文件历史\t7.获取文件\t(按\"q/Q\"退出)\n选择:";
             std::cin>>tmp;
+            if(std::cin.eof())
+            {
+                std::cin.ignore();
+                tmp="q";
+            }
+            if(std::cin.fail())
+            {
+                std::cin.ignore();
+                std::cin.clear();
+            }
         }while(tmp.size()==0);
         int id;
         string name;
@@ -240,12 +271,22 @@ void Client::groupUI()
     do{
         tmp="";
         do{
-            std::cout<<"正在群"<<tosend.in_gid<<"中"<<std::endl;
+            std::cout<<"(正在群\""<<tosend.in_gid<<"\"中)"<<std::endl;
             pr;
             std::cout<<"1.发送消息\t2.发送文件\t3.退群\t4.列出群成员\n"
                 "5.增加管理\t6.删除管理\t7.查看进群申请\t8.移除群成员\n"
                 "9.查询消息历史\t10.查询文件历史\t11.获取文件\t(按\"q/Q\"退出)\n选择:";
             std::cin>>tmp;
+            if(std::cin.eof())
+            {
+                std::cin.ignore();
+                tmp="q";
+            }
+            if(std::cin.fail())
+            {
+                std::cin.ignore();
+                std::cin.clear();
+            }
         }while(tmp.size()==0);
         int id;
         string name;

@@ -24,6 +24,14 @@ public:
             return mysql_num_fields(res.get());
         }
     }
+    int row_num()
+    {
+        if(res==nullptr)return 0;
+        else
+        {
+            return mysql_num_rows(res.get());
+        }
+    }
     std::vector<string> getrow()
     {
         std::vector<string> tmp;
@@ -85,6 +93,10 @@ public:
     {
         return mysql_error(&db);
     }
+    bool iserr()
+    {
+        return mysql_errno(&db);
+    }
 private:
     string getsql(int flag,string a,string b="",string c="",string d="");
 private:
@@ -144,18 +156,23 @@ string mysql_table::getsql(int flag,string a,string b,string c,string d)
         
         case in:
             sql="insert into "+a+"("+b+")values("+c+")";
+            break;
 
         case de:
             sql="delete from "+a;
+            break;
 
         case up:
             sql="update "+a+" set "+b+" where "+c;
+            break;
 
         case cr:
-            sql="create table if not exist "+a+"("+b+")engine="+c;
+            sql="create table if not exists "+a+"("+b+")engine="+c;
+            break;
 
         case dr:
             sql="drop table "+a;
+            break;
 
         default:
             break;

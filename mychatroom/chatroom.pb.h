@@ -709,6 +709,7 @@ class Message final :
     kObjFieldNumber = 1,
     kContextFieldNumber = 2,
     kDateFieldNumber = 3,
+    kGidFieldNumber = 4,
   };
   // repeated int32 obj = 1;
   int obj_size() const;
@@ -784,13 +785,24 @@ class Message final :
   ::google::protobuf::RepeatedPtrField<std::string>* _internal_mutable_date();
 
   public:
+  // optional int32 gid = 4;
+  bool has_gid() const;
+  void clear_gid() ;
+  ::int32_t gid() const;
+  void set_gid(::int32_t value);
+
+  private:
+  ::int32_t _internal_gid() const;
+  void _internal_set_gid(::int32_t value);
+
+  public:
   // @@protoc_insertion_point(class_scope:chatroom.Message)
  private:
   class _Internal;
 
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      2, 3, 0,
+      2, 4, 0,
       36, 2>
       _table_;
   friend class ::google::protobuf::MessageLite;
@@ -807,11 +819,13 @@ class Message final :
                               ::google::protobuf::Arena* arena);
         inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
                               ::google::protobuf::Arena* arena, const Impl_& from);
+    ::google::protobuf::internal::HasBits<1> _has_bits_;
+    mutable ::google::protobuf::internal::CachedSize _cached_size_;
     ::google::protobuf::RepeatedField<::int32_t> obj_;
     mutable ::google::protobuf::internal::CachedSize _obj_cached_byte_size_;
     ::google::protobuf::RepeatedPtrField<std::string> context_;
     ::google::protobuf::RepeatedPtrField<std::string> date_;
-    mutable ::google::protobuf::internal::CachedSize _cached_size_;
+    ::int32_t gid_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
   union { Impl_ _impl_; };
@@ -1733,6 +1747,7 @@ class File final :
     kNameFieldNumber = 2,
     kContextFieldNumber = 3,
     kDateFieldNumber = 4,
+    kGidFieldNumber = 5,
   };
   // repeated int32 obj = 1;
   int obj_size() const;
@@ -1836,13 +1851,24 @@ class File final :
   ::google::protobuf::RepeatedPtrField<std::string>* _internal_mutable_date();
 
   public:
+  // optional int32 gid = 5;
+  bool has_gid() const;
+  void clear_gid() ;
+  ::int32_t gid() const;
+  void set_gid(::int32_t value);
+
+  private:
+  ::int32_t _internal_gid() const;
+  void _internal_set_gid(::int32_t value);
+
+  public:
   // @@protoc_insertion_point(class_scope:chatroom.File)
  private:
   class _Internal;
 
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      2, 4, 0,
+      3, 5, 0,
       30, 2>
       _table_;
   friend class ::google::protobuf::MessageLite;
@@ -1859,12 +1885,14 @@ class File final :
                               ::google::protobuf::Arena* arena);
         inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
                               ::google::protobuf::Arena* arena, const Impl_& from);
+    ::google::protobuf::internal::HasBits<1> _has_bits_;
+    mutable ::google::protobuf::internal::CachedSize _cached_size_;
     ::google::protobuf::RepeatedField<::int32_t> obj_;
     mutable ::google::protobuf::internal::CachedSize _obj_cached_byte_size_;
     ::google::protobuf::RepeatedPtrField<std::string> name_;
     ::google::protobuf::RepeatedPtrField<std::string> context_;
     ::google::protobuf::RepeatedPtrField<std::string> date_;
-    mutable ::google::protobuf::internal::CachedSize _cached_size_;
+    ::int32_t gid_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
   union { Impl_ _impl_; };
@@ -2323,6 +2351,34 @@ File::_internal_mutable_date() {
   return &_impl_.date_;
 }
 
+// optional int32 gid = 5;
+inline bool File::has_gid() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000001u) != 0;
+  return value;
+}
+inline void File::clear_gid() {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  _impl_.gid_ = 0;
+  _impl_._has_bits_[0] &= ~0x00000001u;
+}
+inline ::int32_t File::gid() const {
+  // @@protoc_insertion_point(field_get:chatroom.File.gid)
+  return _internal_gid();
+}
+inline void File::set_gid(::int32_t value) {
+  _internal_set_gid(value);
+  // @@protoc_insertion_point(field_set:chatroom.File.gid)
+}
+inline ::int32_t File::_internal_gid() const {
+  PROTOBUF_TSAN_READ(&_impl_._tsan_detect_race);
+  return _impl_.gid_;
+}
+inline void File::_internal_set_gid(::int32_t value) {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  _impl_._has_bits_[0] |= 0x00000001u;
+  _impl_.gid_ = value;
+}
+
 // -------------------------------------------------------------------
 
 // Message
@@ -2572,6 +2628,34 @@ inline ::google::protobuf::RepeatedPtrField<std::string>*
 Message::_internal_mutable_date() {
   PROTOBUF_TSAN_READ(&_impl_._tsan_detect_race);
   return &_impl_.date_;
+}
+
+// optional int32 gid = 4;
+inline bool Message::has_gid() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000001u) != 0;
+  return value;
+}
+inline void Message::clear_gid() {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  _impl_.gid_ = 0;
+  _impl_._has_bits_[0] &= ~0x00000001u;
+}
+inline ::int32_t Message::gid() const {
+  // @@protoc_insertion_point(field_get:chatroom.Message.gid)
+  return _internal_gid();
+}
+inline void Message::set_gid(::int32_t value) {
+  _internal_set_gid(value);
+  // @@protoc_insertion_point(field_set:chatroom.Message.gid)
+}
+inline ::int32_t Message::_internal_gid() const {
+  PROTOBUF_TSAN_READ(&_impl_._tsan_detect_race);
+  return _impl_.gid_;
+}
+inline void Message::_internal_set_gid(::int32_t value) {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  _impl_._has_bits_[0] |= 0x00000001u;
+  _impl_.gid_ = value;
 }
 
 // -------------------------------------------------------------------

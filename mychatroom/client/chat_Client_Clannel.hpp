@@ -11,7 +11,11 @@
 using std::string;
 using chatroom::Type;
 #define pr printf("=========================================================================\n")
-
+#define spr printf("-----------------------------------------------------------------------\n")
+#define _Greed "\033[32m"
+#define _Yellow "\033[33m"
+#define _Blue "\033[34m"
+#define _Reset "\033[0m "
 class Clannel{
 public:
     Clannel(int _fd):fd(_fd),ulock(mtx,std::defer_lock){}
@@ -33,7 +37,7 @@ protected:
     static bool recv_ret;
     static std::mutex mtx;
     std::unique_lock<std::mutex> ulock;
-    std::condition_variable cond;
+    static std::condition_variable cond;
 };
 std::mutex Clannel::mtx;
 bool Clannel::send_continue=0;
@@ -41,6 +45,7 @@ bool Clannel::recv_ret=0;
 int Clannel::uid=0;
 int Clannel::in_uid=0;
 int Clannel::in_gid=0;
+std::condition_variable Clannel::cond;
 
 
 

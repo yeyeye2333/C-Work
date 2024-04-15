@@ -14,6 +14,7 @@ private:
 template<typename ...T>
 void Clannel_send::_send(Type type,int id1,int id2,const string&s1,const string&s2)
 {
+    send_continue=0;
     string sendstr;
     switch (type)
     {
@@ -185,10 +186,9 @@ void Clannel_send::_send(Type type,int id1,int id2,const string&s1,const string&
         default:
             break;
     }
-    std::cerr<<"等待响应\n";
+    std::cerr<<"等待响应...\n";
     ulock.lock();
-    cond.wait(ulock,[](){return send_continue==0;});
-    std::cerr<<"唤醒！\n";
+    cond.wait(ulock,[](){return send_continue==1;});
     ulock.unlock();
 }
 void  Clannel_send::realsend(const string &sendstr,Type type)

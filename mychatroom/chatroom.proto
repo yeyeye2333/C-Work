@@ -53,11 +53,13 @@ message File{
     repeated string name=2;
     repeated bytes context=3;
     repeated string date=4;
+    optional int32 gid=5;
 }
 message Message{
     repeated int32 obj=1;
     repeated string context=2;
     repeated string date=3;
+    optional int32 gid=4;
 }
 message Signup_info{
     optional int32 uid=1;

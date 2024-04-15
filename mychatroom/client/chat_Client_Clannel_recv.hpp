@@ -12,14 +12,29 @@ private:
 void Clannel_recv::_recv()
 {
     char len;
-    recv(fd,&len,sizeof(len),0);
+    if(recv(fd,&len,sizeof(len),0)<sizeof(len))
+    {
+        std::cerr<<"服务器无响应";
+        exit(EXIT_FAILURE);
+    }
     char tmp[len];
-    recv(fd,tmp,len,0);
+    if(recv(fd,tmp,len,0)<len)
+    {
+        std::cerr<<"服务器无响应";
+        exit(EXIT_FAILURE);
+    }
     chatroom::Head _head;
     _head.ParseFromArray(tmp,len);
-    std::cerr<<_head.DebugString();
+    // std::cerr<<_head.DebugString();
     char tmp2[_head.len()];
-    if(_head.len()>0)recv(fd,tmp2,_head.len(),0);
+    if(_head.len()>0)
+    {
+        if(recv(fd,tmp2,_head.len(),0)<_head.len())
+        {
+            std::cerr<<"服务器无响应";
+            exit(EXIT_FAILURE);
+        }
+    }
     chatroom::File _file;
     chatroom::Message _mess;
     chatroom::Signup_info _signup;
@@ -27,7 +42,11 @@ void Clannel_recv::_recv()
     chatroom::IDs _id;
     chatroom::Strs _str;
     if(_head.type()!=Type::notify_g_f&&_head.type()!=Type::notify_g_m&&_head.type()!=Type::notify_g_req
-    &&_head.type()!=Type::notify_u_f&&_head.type()!=Type::notify_u_m&&_head.type()!=Type::notify_u_req)recv_ret=_head.is();
+    &&_head.type()!=Type::notify_u_f&&_head.type()!=Type::notify_u_m&&_head.type()!=Type::notify_u_req)
+    {
+        recv_ret=_head.is();
+        spr;
+    }
     switch(_head.type())
     {
         case Type::login:
@@ -39,7 +58,7 @@ void Clannel_recv::_recv()
             else
             {
                 _id.ParseFromArray(tmp2,_head.len());
-                std::cout<<"离线时有用户发送消息:"<<std::endl;
+                if(_id.id_size()>0)std::cout<<"离线时有用户发送消息:"<<std::endl;
                 for(int c=0;c<_id.id_size();c++)std::cout<<_id.id(c)<<std::endl;
             }
             break;
@@ -81,6 +100,7 @@ void Clannel_recv::_recv()
             else
             {
                 _str.ParseFromArray(tmp2,_head.len());
+                std::cout<<"请求ID:\n";
                 for(int c=0;c<_str.str_size();c++)
                 {
                     std::cout<<_str.str(c)<<"\t";
@@ -226,7 +246,7 @@ void Clannel_recv::_recv()
             else
             {
                 _mess.ParseFromArray(tmp2,_head.len());
-                std::cout<<"UID\t\t管理员?";
+                std::cout<<"UID\t\t是/否为管理员";
                 for(int c=0;c<_mess.obj_size();c++)
                 {
                     std::cout<<_mess.obj(c)<<"\t\t";
@@ -284,7 +304,6 @@ void Clannel_recv::_recv()
                 in_gid=0;
                 std::cerr<<"错误：不是组成员\n";
             }
-            else std::cout<<"正在群"<<in_gid<<"中"<<std::endl;
             break;
 
         case Type::fri_confirm:
@@ -293,37 +312,47 @@ void Clannel_recv::_recv()
                 in_uid=0;
                 std::cerr<<"错误：对方不是好友\n";
             }
-            else std::cout<<"正在与"<<in_uid<<"聊天"<<std::endl;
             break;
 
         case Type::notify_u_req:
-
+            _id.ParseFromArray(tmp2,_head.len());
+            std::cout<<_Greed<<"\""<<_id.id(0)<<"\""<<"向你发送了好友请求"<<_Reset<<std::endl;
             break;
         
         case Type::notify_u_m:
-
+            _mess.ParseFromArray(tmp2,_head.len());
+            if(in_uid!=_mess.obj(0))std::cout<<_Blue<<"\""<<_mess.obj(0)<<"\""<<"向你发送了一条消息"<<_Reset<<std::endl;
+            else std::cout<<_Blue<<"\""<<_mess.obj(0)<<"\":"<<_mess.context(0)<<_Reset<<std::endl;
             break;
         
         case Type::notify_u_f:
-            // 处理 notify_u_f 类型的逻辑
+            _file.ParseFromArray(tmp2,_head.len());
+            if(in_uid!=_file.obj(0))std::cout<<_Yellow<<"\""<<_file.obj(0)<<"\""<<"向你发送了一个文件"<<_Reset<<std::endl;
+            else std::cout<<_Yellow<<"\""<<_file.obj(0)<<"\"->"<<_file.name(0)<<_Reset<<std::endl;
             break;
         
         case Type::notify_g_req:
-            // 处理 notify_g_req 类型的逻辑
+            _id.ParseFromArray(tmp2,_head.len());
+            std::cout<<_Greed<<"\""<<_id.id(0)<<"\""<<"向群\""<<_id.id(1)<<"\"发送了进群申请"<<_Reset<<std::endl;
             break;
         
         case Type::notify_g_m:
-            // 处理 notify_g_m 类型的逻辑
+            _mess.ParseFromArray(tmp2,_head.len());
+            if(in_gid!=_mess.gid())std::cout<<_Blue<<"\""<<_mess.obj(0)<<"\""<<"在群\""<<_mess.gid()<<"\"中发送了一条消息"<<_Reset<<std::endl;
+            else std::cout<<_Blue<<"\""<<_mess.obj(0)<<"\":"<<_mess.context(0)<<_Reset<<std::endl;
             break;
         
         case Type::notify_g_f:
-            // 处理 notify_g_f 类型的逻辑
+            _file.ParseFromArray(tmp2,_head.len());
+            if(in_gid!=_file.gid())std::cout<<_Yellow<<"\""<<_file.obj(0)<<"\""<<"在群\""<<_file.gid()<<"\"中发送了一个文件"<<_Reset<<std::endl;
+            else std::cout<<_Yellow<<"\""<<_file.obj(0)<<"\"->"<<_file.name(0)<<_Reset<<std::endl;
             break;
 
         default:
             break;
     }
-    send_continue=1;
+    if(_head.type()!=Type::notify_g_f&&_head.type()!=Type::notify_g_m&&_head.type()!=Type::notify_g_req
+    &&_head.type()!=Type::notify_u_f&&_head.type()!=Type::notify_u_m&&_head.type()!=Type::notify_u_req)send_continue=1;
     cond.notify_all();
 }
 

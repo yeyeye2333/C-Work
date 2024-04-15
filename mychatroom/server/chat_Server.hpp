@@ -5,7 +5,7 @@
 #include"../chat_Socket.hpp"
 #include"chat_Server_Reactor.hpp"
 #include<time.h>
-char cur_time[20]={0};//%Y-%m-%d %I:%M:%S
+char cur_time[20]={0};//%Y-%m-%d %H:%M:%S
 
 class Server{
 public:
@@ -18,11 +18,10 @@ private:
 void handler(Reactor& one)
 {
     while (true)
-    {std::cerr<<"21"<<"\n";
+    {
         auto pollque=one.poll();
         for(auto tmp:pollque)
         {
-            std::cerr<<"25"<<"\n";
             tmp->deal();
         }
     }
@@ -36,7 +35,14 @@ void Server::start()
     {
         threads.addtask(handler,std::ref(reactor[c]));
     }
-    // timer.start();
+    for(auto &tmp:reactor)
+    {
+        for(auto &tmp2:reactor)
+        {
+            tmp.addreac(&tmp2);
+        }
+    }
+    timer.start();
     Socket_listen listen;
     listen._bind();
     if(listen._listen()==0)exit(EXIT_FAILURE);
@@ -51,7 +57,7 @@ void Server::start()
         if(timer.timer_flag>0)
         {
             auto tmp=time(nullptr);
-            strftime(cur_time,2,"%Y-%m-%d %I:%M:%S",localtime(&tmp));
+            strftime(cur_time,20,"%Y-%m-%d %H:%M:%S",localtime(&tmp));
         }
     }
 }
