@@ -6,6 +6,7 @@
 #include"chat_Client_Clannel_recv.hpp"
 #include"chat_Client_Clannel_send.hpp"
 #include<mutex>
+#include<fstream>
 
 class Client{
 public:
@@ -24,6 +25,17 @@ private:
     {
         while(true)torecv._recv();
     }
+    void heart()
+    {
+        while(true)
+        {
+            sleep(20);
+            string sendhead;
+            set_Head(&sendhead,Type::heart_check,0);
+            char len=sendhead.size();
+            if(send(fd,(string(&len,sizeof(len))+sendhead).c_str(),sizeof(len)+len,0)==-1)exit(EXIT_FAILURE);
+        }
+    }
 };
 bool Client::start(const string&server)
 {
@@ -38,7 +50,9 @@ bool Client::start(const string&server)
 void Client::initial()
 {
     threads.addthread();
-    threads.addtask([this](){return this->recv_work();});
+    threads.addthread();
+    threads.addtask([this]{return this->recv_work();});
+    threads.addtask([this]{return this->heart();});
     string tmp;
     do{
         tmp="";
@@ -48,12 +62,12 @@ void Client::initial()
             std::cin>>tmp;
             if(std::cin.eof())
             {
-                std::cin.ignore();
+                std::cin.ignore(1000);
                 tmp="q";
             }
             if(std::cin.fail())
             {
-                std::cin.ignore();
+                std::cin.ignore(1000);
                 std::cin.clear();
             }
         }while(tmp.size()==0);
@@ -110,12 +124,12 @@ void Client::mainUI()
             std::cin>>tmp;
             if(std::cin.eof())
             {
-                std::cin.ignore();
+                std::cin.ignore(1000);
                 tmp="q";
             }
             if(std::cin.fail())
             {
-                std::cin.ignore();
+                std::cin.ignore(1000);
                 std::cin.clear();
             }
         }while(tmp.size()==0);
@@ -209,18 +223,19 @@ void Client::userUI()
             std::cin>>tmp;
             if(std::cin.eof())
             {
-                std::cin.ignore();
+                std::cin.ignore(1000);
                 tmp="q";
             }
             if(std::cin.fail())
             {
-                std::cin.ignore();
+                std::cin.ignore(1000);
                 std::cin.clear();
             }
         }while(tmp.size()==0);
         int id;
         string name;
         string context;
+        std::ifstream file_i;
         switch (tmp[0])
         {
             case 'q':case 'Q':
@@ -235,7 +250,25 @@ void Client::userUI()
                 break;
 
             case '2':
-                //文件
+                std::cout<<"输入文件路径(目录+文件名)(大小不超过64K):"<<std::flush;
+                std::cin>>context;
+                try{
+                    file_i.open(context,std::iostream::binary|std::iostream::in);
+                    if(file_i.is_open())
+                    {
+                        file_i.seekg(0,file_i.end);
+                        auto size=file_i.tellg();
+                        file_i.seekg(0,file_i.beg);
+                        std::unique_ptr<char[]> file_ptr(new char[size]);
+                        file_i.read(file_ptr.get(),size);
+                        std::cout<<"确定文件名:"<<std::flush;
+                        std::cin>>name;
+                        tosend._send(Type::u_file,tosend.in_uid,0,name,string(file_ptr.get(),size));
+                    }
+                }
+                catch(std::invalid_argument){std::cerr<<"错误:文件名无效\n";}
+                catch(std::ios_base::failure){std::cerr<<"错误:无权限\n";}
+                catch(std::bad_alloc){std::cerr<<"错误:内存不足\n";}
                 break;    
             
             case '3':
@@ -279,18 +312,19 @@ void Client::groupUI()
             std::cin>>tmp;
             if(std::cin.eof())
             {
-                std::cin.ignore();
+                std::cin.ignore(1000);
                 tmp="q";
             }
             if(std::cin.fail())
             {
-                std::cin.ignore();
+                std::cin.ignore(1000);
                 std::cin.clear();
             }
         }while(tmp.size()==0);
         int id;
         string name;
         string context;
+        std::ifstream file_i;
         switch (tmp[0])
         {
             case 'q':case 'Q':
@@ -315,7 +349,25 @@ void Client::groupUI()
                 break;
             
             case '2':
-                //文件
+                std::cout<<"输入文件路径(目录+文件名)(大小不超过64K):"<<std::flush;
+                std::cin>>context;
+                try{
+                    file_i.open(context,std::iostream::binary|std::iostream::in);
+                    if(file_i.is_open())
+                    {
+                        file_i.seekg(0,file_i.end);
+                        auto size=file_i.tellg();
+                        file_i.seekg(0,file_i.beg);
+                        std::unique_ptr<char[]> file_ptr(new char[size]);
+                        file_i.read(file_ptr.get(),size);
+                        std::cout<<"确定文件名:"<<std::flush;
+                        std::cin>>name;
+                        tosend._send(Type::u_file,tosend.in_uid,0,name,string(file_ptr.get(),size));
+                    }
+                }
+                catch(std::invalid_argument){std::cerr<<"错误:文件名无效\n";}
+                catch(std::ios_base::failure){std::cerr<<"错误:无权限\n";}
+                catch(std::bad_alloc){std::cerr<<"错误:内存不足\n";}
                 break;
 
             case '3':

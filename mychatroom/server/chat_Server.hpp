@@ -54,10 +54,20 @@ void Server::start()
             std::cerr<<"add="<<fd<<"\n";
             reactor[fd%num].addfd(fd);
         }
-        if(timer.timer_flag>0)
+        else if(timer.timer_flag>0)
         {
+            timer.timer_flag--;
             auto tmp=time(nullptr);
             strftime(cur_time,20,"%Y-%m-%d %H:%M:%S",localtime(&tmp));
+            if(timer.timer_flag>=30)
+            {
+                timer.timer_flag-=30;
+                for(auto&tmp:reactor)
+                {
+                    auto tmp2=tmp.heart_check();
+                    if(tmp2>0)std::cout<<tmp2<<"个客户端无心跳";
+                }
+            }
         }
     }
 }

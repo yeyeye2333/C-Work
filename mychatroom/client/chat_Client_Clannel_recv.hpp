@@ -14,13 +14,13 @@ void Clannel_recv::_recv()
     char len;
     if(recv(fd,&len,sizeof(len),0)<sizeof(len))
     {
-        std::cerr<<"服务器无响应";
+        std::cerr<<"与服务器断开连接";
         exit(EXIT_FAILURE);
     }
     char tmp[len];
     if(recv(fd,tmp,len,0)<len)
     {
-        std::cerr<<"服务器无响应";
+        std::cerr<<"与服务器断开连接";
         exit(EXIT_FAILURE);
     }
     chatroom::Head _head;
@@ -31,7 +31,7 @@ void Clannel_recv::_recv()
     {
         if(recv(fd,tmp2,_head.len(),0)<_head.len())
         {
-            std::cerr<<"服务器无响应";
+            std::cerr<<"与服务器断开连接";
             exit(EXIT_FAILURE);
         }
     }
@@ -47,6 +47,8 @@ void Clannel_recv::_recv()
         recv_ret=_head.is();
         spr;
     }
+    std::ofstream file_o;
+    string file_path;
     switch(_head.type())
     {
         case Type::login:
@@ -68,7 +70,7 @@ void Clannel_recv::_recv()
             else
             {
                 _signup.ParseFromArray(tmp2,_head.len());
-                std::cout<<"uid:"<<_signup.uid()<<std::endl;
+                std::cout<<"你的 uid="<<_signup.uid()<<std::endl;
             }
             break;
 
@@ -167,7 +169,20 @@ void Clannel_recv::_recv()
             if(_head.is()==0)std::cerr<<"操作失败\n";
             else
             {
-                //创建文件
+                _file.ParseFromArray(tmp2,_head.len());
+                std::cout<<"输入文件路径(目录):"<<std::flush;
+                std::cin>>file_path;
+                file_path+="/"+_file.name(0);
+                try{
+                    file_o.open(file_path,std::iostream::binary|std::iostream::out);
+                    if(file_o.is_open())
+                    {
+                        file_o.write(_file.context(0).c_str(),_file.context(0).size());
+                    }
+                }
+                catch(std::invalid_argument){std::cerr<<"错误:文件名无效\n";}
+                catch(std::ios_base::failure){std::cerr<<"错误:无权限\n";}
+                catch(std::bad_alloc){std::cerr<<"错误:内存不足\n";}
             }
             break;
         
@@ -294,7 +309,20 @@ void Clannel_recv::_recv()
             if(_head.is()==0)std::cerr<<"操作失败\n";
             else
             {
-                //创建文件
+                _file.ParseFromArray(tmp2,_head.len());
+                std::cout<<"输入文件路径(目录):"<<std::flush;
+                std::cin>>file_path;
+                file_path+="/"+_file.name(0);
+                try{
+                    file_o.open(file_path,std::iostream::binary|std::iostream::out);
+                    if(file_o.is_open())
+                    {
+                        file_o.write(_file.context(0).c_str(),_file.context(0).size());
+                    }
+                }
+                catch(std::invalid_argument){std::cerr<<"错误:文件名无效\n";}
+                catch(std::ios_base::failure){std::cerr<<"错误:无权限\n";}
+                catch(std::bad_alloc){std::cerr<<"错误:内存不足\n";}
             }
             break;
         

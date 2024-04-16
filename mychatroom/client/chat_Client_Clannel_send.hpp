@@ -196,7 +196,6 @@ void  Clannel_send::realsend(const string &sendstr,Type type)
     string sendhead;
     set_Head(&sendhead,type,sendstr.size());
     char len=sendhead.size();
-    string a(string(&len,sizeof(len))+sendhead);
     if(send(fd,(string(&len,sizeof(len))+sendhead).c_str(),sizeof(len)+len,0)==-1)exit(EXIT_FAILURE);
     if(sendstr.size()>0)if(send(fd,sendstr.c_str(),sendstr.size(),0)==-1)exit(EXIT_FAILURE);
 }

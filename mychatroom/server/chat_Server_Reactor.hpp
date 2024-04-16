@@ -163,7 +163,7 @@ public:
     {
         int res=0;
         ulock.lock();
-        for(auto tmp:fd_map)
+        for(auto&tmp:fd_map)
         {
             if(tmp.second.heart==1)tmp.second.heart=0;
             else
@@ -541,6 +541,7 @@ void Clannel_checked::deal()
             chatroom::Strs _str;
             std::vector<std::vector<string>> tmpvv;
             std::vector<string> tmpv;
+            // std::cerr<<head.DebugString();
             int tmpi;
             bool is=1;
             switch (head.type())

@@ -279,8 +279,8 @@ public:
         auto res=select_u_files(std::to_string(uid),std::to_string(fri_uid));
         for(auto tmp=res.getrow();tmp.size()!=0;tmp=res.getrow())
         {
-            tmp1.push_back(tmp[4]);
-            tmp2.push_back(tmp[3]);
+            tmp1.push_back(tmp[3]);
+            tmp2.push_back(tmp[2]);
             tmp3.push_back(tmp[0]);
         }
         return {tmp3,tmp1,tmp2};
@@ -478,8 +478,8 @@ public:
         auto res=select_g_files(std::to_string(gid));
         for(auto tmp=res.getrow();tmp.size()!=0;tmp=res.getrow())
         {
-            tmp1.push_back(tmp[4]);
-            tmp2.push_back(tmp[3]);
+            tmp1.push_back(tmp[3]);
+            tmp2.push_back(tmp[2]);
             tmp3.push_back(tmp[0]);
         }
         return {tmp3,tmp2,tmp1};
@@ -530,7 +530,7 @@ private:
         if(file_name.size()==0)return save_mysql.s_f_wh_or("uid,fri_uid,time,file_name","u_files",
                                 "(uid="+uid+" and fri_uid="+fri_uid+")or(uid="+fri_uid+" and fri_uid="+uid+")","time");
         else return save_mysql.s_f_wh_or("uid,fri_uid,file,time,file_name","u_files",
-                                "((uid="+uid+" and fri_uid="+fri_uid+")or(uid="+fri_uid+" and fri_uid="+uid+"))and file_name="+file_name,"time");
+                                "((uid="+uid+" and fri_uid="+fri_uid+")or(uid="+fri_uid+" and fri_uid="+uid+"))and file_name=\'"+file_name+"\'","time");
     }
 
     bool insert_u_info(const string &password,const string &user_name="",const string &group_num="0")
@@ -556,7 +556,7 @@ private:
     }
     bool insert_u_files(const string &uid,const string &fri_uid,const string &file,const string &time,const string&file_name)
     {
-        return save_mysql.i_type_val("u_files","uid,fri_uid,file,time",
+        return save_mysql.i_type_val("u_files","uid,fri_uid,file,time,file_name",
                                 uid+","+fri_uid+",\'"+file+"\',\'"+time+"\',\'"+file_name+"\'");
     }
 
@@ -663,7 +663,7 @@ private:
     mysql_res select_g_files(const string &gid,const string& file_name="")
     {
         if(file_name.size()==0)return save_mysql.s_f_wh_or("gid,uid,time,file_name","g_files","gid="+gid,"time");
-        else return save_mysql.s_f_wh_or("gid,uid,file,time,file_name","g_files","gid="+gid+" and file_name="+file_name,"time");
+        else return save_mysql.s_f_wh_or("gid,uid,file,time,file_name","g_files","gid="+gid+" and file_name=\'"+file_name+"\'","time");
     }
 
     bool insert_g_memebers(const string &gid,const string &uid,const string &is_manager)
@@ -688,7 +688,7 @@ private:
     }
     bool insert_g_files(const string &gid,const string &uid,const string &file,const string &time,const string &file_name)
     {
-        return save_mysql.i_type_val("g_files","gid,uid,file,time",
+        return save_mysql.i_type_val("g_files","gid,uid,file,time,file_name",
                                     gid+","+uid+",\'"+file+"\',\'"+time+"\',\'"+file_name+"\'");
     }
 

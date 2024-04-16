@@ -8,6 +8,7 @@
 #include<unistd.h>
 #include<sys/socket.h>
 #include<tuple>
+#include<fstream>
 using std::string;
 using chatroom::Type;
 #define pr printf("=========================================================================\n")
