@@ -1,6 +1,9 @@
 #include<stdio.h>
+int test(){
+    printf("jjj");
+}
 int main()
 {
-    if('\0'==NULL)printf("!!!!!!!!!!!!!!?");
+    test();
     return 0;
 }

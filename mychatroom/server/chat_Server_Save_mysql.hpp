@@ -11,6 +11,9 @@
 using std::string;
 using std::unique_ptr;
 
+class select_err{
+};
+
 enum {se,in,de,up,cr,dr};
 
 class mysql_res{
@@ -32,7 +35,7 @@ public:
             return mysql_num_rows(res.get());
         }
     }
-    std::vector<string> getrow()
+    std::vector<string> getrow(int least=0)//小于least抛出错误
     {
         std::vector<string> tmp;
         int num=col_num();
@@ -43,6 +46,10 @@ public:
             {
                 tmp.push_back(row[c]);
             }
+        }
+        if(tmp.size()<least){
+            std::cerr<<"select "<<tmp.size()<<":"<<least<<std::endl;
+            throw select_err();
         }
         return std::move(tmp);
     }

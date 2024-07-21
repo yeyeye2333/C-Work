@@ -51,9 +51,10 @@ message Head{
 message File{
     repeated int32 obj=1;
     repeated string name=2;
-    repeated bytes context=3;
+    // repeated bytes context=3;
     repeated string date=4;
-    optional int32 gid=5;
+    repeated int64 len=5;
+    optional int32 gid=6;
 }
 message Message{
     repeated int32 obj=1;

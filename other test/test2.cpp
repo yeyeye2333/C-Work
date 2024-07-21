@@ -1,5 +1,7 @@
 #include<iostream>
+#include <linux/io_uring.h>
 int main()
 {
-    std::cout<<"111";
+    int a[5];
+    std::cerr<<sizeof(a)<<sizeof(*a);
 }

@@ -62,14 +62,15 @@ void set_File(string*s_ptr,const std::vector<int> &obj,const std::vector<string>
     chatroom::File _File;
     for(auto &tmp:obj)_File.add_obj(tmp);
     for(auto &tmp:name)_File.add_name(tmp);
-    for(auto &tmp:context)_File.add_context(tmp);
+    for(auto &tmp:context)_File.add_len(std::stoi(tmp));
     _File.SerializePartialToString(s_ptr);
 }
-void set_Message(string*s_ptr,const std::vector<int>&obj,const std::vector<string>&context)
+void set_Message(string*s_ptr,const std::vector<int>&obj={},const std::vector<string>&context={},int gid=0)
 {
     chatroom::Message _Message;
     for(auto &tmp:obj)_Message.add_obj(tmp);
     for(auto &tmp:context)_Message.add_context(tmp);
+    if(gid!=0)_Message.set_gid(gid);
     _Message.SerializePartialToString(s_ptr);
 }
 void set_IDs(string*s_ptr,const std::vector<int>&id)

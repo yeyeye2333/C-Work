@@ -11,10 +11,11 @@
 #define maxgroup 3
 #define maxg_messages 1000
 #define maxg_files 10
-#define maxfile 65535
+// #define maxfile 65535
 extern char cur_time[20];
 
 using std::string;
+
 class Save{
 public:
     Save():ulock(mtx,std::defer_lock)
@@ -40,7 +41,7 @@ public:
                                             time datetime not null");
         save_mysql.c_val_eng("u_files","uid int not null,\
                                             fri_uid int not null,\
-                                            file blob not null,\
+                                            file_len bigint not null,\
                                             time datetime not null,\
                                             file_name char(30) not null");//blob<=65535
 
@@ -56,14 +57,14 @@ public:
                                         primary key(gid)");        
         save_mysql.c_val_eng("g_request","send_uid int not null,\
                                             recv_gid int not null,\
-                                            primary key(send_uid,recv_uid)");       
+                                            primary key(send_uid,recv_gid)");
         save_mysql.c_val_eng("g_messages","gid int not null,\
                                             uid int not null,\
                                             message varchar(1000) not null,\
                                             time datetime not null");   
         save_mysql.c_val_eng("g_files","gid int not null,\
                                         uid int not null,\
-                                        file blob not null,\
+                                        file_len bigint not null,\
                                         time datetime not null,\
                                         file_name char(30) not null");                                                                                                                                  
     }
@@ -128,7 +129,7 @@ public:
     {
         auto tmp=select_u_info(std::to_string(uid));
         if(tmp.row_num()==0)return 0;
-        auto row=tmp.getrow();
+        auto row=tmp.getrow(3);
         if(row[0]==std::to_string(uid)&&row[2]==password)return 1;
         else return 0;
     }
@@ -220,14 +221,14 @@ public:
     }
     bool u_message(int uid,int fri_uid,const string&message)
     {
-        if(select_u_relation(std::to_string(uid),std::to_string(fri_uid)).getrow()[2]=="1"||
-        select_u_relation(std::to_string(fri_uid),std::to_string(uid)).getrow()[2]=="1")return 0;
+        if(select_u_relation(std::to_string(uid),std::to_string(fri_uid)).getrow(3)[2]=="1"||
+        select_u_relation(std::to_string(fri_uid),std::to_string(uid)).getrow(3)[2]=="1")return 0;
         bool b1=1,b2=1,b3=1,b4=1;
         save_mysql.begin();
         if((b1=insert_u_messages(std::to_string(uid),std::to_string(fri_uid),message,cur_time))==1)
         {
             b2=update_u_relation(std::to_string(uid),std::to_string(fri_uid),"","mess_num+1");
-            if(std::stoi(select_u_relation(std::to_string(uid),std::to_string(fri_uid)).getrow()[3])>maxu_messages)
+            if(std::stoi(select_u_relation(std::to_string(uid),std::to_string(fri_uid)).getrow(4)[3])>maxu_messages)
             {
                 if((b3=delete_u_messages_num(std::to_string(uid),std::to_string(fri_uid),10))==1)
                     b4=update_u_relation(std::to_string(uid),std::to_string(fri_uid),"","mess_num-10");
@@ -237,17 +238,16 @@ public:
         else save_mysql.rollback();
         return b1&b2&b3&b4;
     }
-    bool u_file(int uid,int fri_uid,const string&file,const string&file_name)
+    bool u_file(int uid,int fri_uid,long file_len,const string&file_name)
     {
-        if(select_u_relation(std::to_string(uid),std::to_string(fri_uid)).getrow()[2]=="1"||
-        select_u_relation(std::to_string(fri_uid),std::to_string(uid)).getrow()[2]=="1"||
-        file.size()>=maxfile)return 0;
+        if(select_u_relation(std::to_string(uid),std::to_string(fri_uid)).getrow(3)[2]=="1"||
+        select_u_relation(std::to_string(fri_uid),std::to_string(uid)).getrow(3)[2]=="1")return 0;
         bool b1=1,b2=1,b3=1,b4=1;
         save_mysql.begin();
-        if((b1=insert_u_files(std::to_string(uid),std::to_string(fri_uid),file,cur_time,file_name))==1)
+        if((b1=insert_u_files(std::to_string(uid),std::to_string(fri_uid),std::to_string(file_len),cur_time,file_name))==1)
         {
             b2=update_u_relation(std::to_string(uid),std::to_string(fri_uid),"","","file_num+1");
-            if(std::stoi(select_u_relation(std::to_string(uid),std::to_string(fri_uid)).getrow()[4])>maxu_files)
+            if(std::stoi(select_u_relation(std::to_string(uid),std::to_string(fri_uid)).getrow(5)[4])>maxu_files)
             {
                 if((b3=delete_u_messages_num(std::to_string(uid),std::to_string(fri_uid),1))==1)
                     b4=update_u_relation(std::to_string(uid),std::to_string(fri_uid),"","","file_num-10");
@@ -303,7 +303,7 @@ public:
     }
     int g_create(int uid,string g_name)
     {
-        if(std::stoi(select_u_info(std::to_string(uid)).getrow()[3])>=maxgroup)return 0;
+        if(std::stoi(select_u_info(std::to_string(uid)).getrow(4)[3])>=maxgroup)return 0;
         save_mysql.begin();
         ulock.lock();
         auto b1=insert_g_info(std::to_string(uid),g_name);
@@ -316,7 +316,7 @@ public:
     }
     bool g_disban(int uid,int gid)
     {
-        if(std::stoi(select_g_info(std::to_string(gid)).getrow()[1])!=uid)return 0;
+        if(std::stoi(select_g_info(std::to_string(gid)).getrow(2)[1])!=uid)return 0;
         save_mysql.begin();
         auto b1=update_u_info(std::to_string(uid),"group_num-1");
         auto b2=delete_g_info(std::to_string(gid));
@@ -338,7 +338,7 @@ public:
     bool g_add(int manager,int gid,int uid)
     {
         if(select_g_request(std::to_string(gid),std::to_string(uid)).row_num()==0||
-            std::stoi(select_g_memebers_gid(std::to_string(gid),std::to_string(manager)).getrow()[2])==0)
+            std::stoi(select_g_memebers_gid(std::to_string(gid),std::to_string(manager)).getrow(3)[2])==0)
             return 0;
         else
         {
@@ -351,21 +351,23 @@ public:
         }
     }
     bool g_del(int manager,int gid,int uid)
-    {
-        if(select_g_request(std::to_string(gid),std::to_string(uid)).row_num()==0||
-            std::stoi(select_g_memebers_gid(std::to_string(gid),std::to_string(manager)).getrow()[2])==0)
+    {   
+        if(std::stoi(select_g_memebers_gid(std::to_string(gid),std::to_string(manager)).getrow(3)[2])==0)
+        { 
             return 0;
+        }
         else return delete_g_members_uid(std::to_string(uid));
     }
     std::vector<string> g_listreq(int manager,int gid)
     {
         std::vector<string> res;
-        if(std::stoi(select_g_memebers_gid(std::to_string(gid),std::to_string(manager)).getrow()[2])==0)return res;
+        if(std::stoi(select_g_memebers_gid(std::to_string(gid),std::to_string(manager)).getrow(3)[2])==0)return res;
         auto tmp=select_g_request(std::to_string(gid));
+        printf("365\n");std::cerr<<save_mysql.error_what();
         for(auto tmp2=tmp.getrow();tmp2.size()!=0;tmp2=tmp.getrow())
         {
             res.push_back(tmp2[0]);
-        }
+        }printf("369\n");
         return res;
     }
     std::vector<std::vector<string>> g_search(int uid)
@@ -383,12 +385,13 @@ public:
     }
     bool g_message(int uid,int gid,const string&message)
     {
+        select_g_memebers_uid(std::to_string(uid)).getrow();
         bool b1=1,b2=1,b3=1,b4=1;
         save_mysql.begin();
         if((b1=insert_g_messages(std::to_string(gid),std::to_string(uid),message,cur_time))==1)
         {
             b2=update_g_info(std::to_string(gid),"mess_num+1");
-            if(std::stoi(select_g_info(std::to_string(gid)).getrow()[3])>maxg_messages)
+            if(std::stoi(select_g_info(std::to_string(gid)).getrow(4)[3])>maxg_messages)
             {
                 if((b3=delete_g_messages(std::to_string(gid),50))==1)
                     b4=update_g_info(std::to_string(gid),"mess_num-50");
@@ -398,15 +401,15 @@ public:
         else save_mysql.rollback();
         return b1&b2&b3&b4;
     }
-    bool g_file(int uid,int gid,const string&file,const string&file_name)
+    bool g_file(int uid,int gid,long file_len,const string&file_name)
     {
-        if(file.size()>=maxfile)return 0;
+        select_g_memebers_uid(std::to_string(uid)).getrow();
         bool b1=1,b2=1,b3=1,b4=1;
         save_mysql.begin();
-        if((b1=insert_g_files(std::to_string(gid),std::to_string(uid),file,cur_time,file_name))==1)
+        if((b1=insert_g_files(std::to_string(gid),std::to_string(uid),std::to_string(file_len),cur_time,file_name))==1)
         {
             b2=update_g_info(std::to_string(gid),"","file_num+1");
-            if(std::stoi(select_g_info(std::to_string(gid)).getrow()[4])>maxg_files)
+            if(std::stoi(select_g_info(std::to_string(gid)).getrow(5)[4])>maxg_files)
             {
                 if((b3=delete_g_files(std::to_string(gid),2))==1)
                     b4=update_g_info(std::to_string(gid),"","file_num-2");
@@ -418,7 +421,7 @@ public:
     }
     bool g_quit(int uid,int gid)
     {
-        if(std::stoi(select_g_info(std::to_string(gid)).getrow()[1])!=uid)
+        if(std::stoi(select_g_info(std::to_string(gid)).getrow(2)[1])!=uid)
         {
             return delete_g_members_gid(std::to_string(gid),std::to_string(uid));
         }
@@ -426,6 +429,7 @@ public:
     }
     std::vector<std::vector<string>> g_members(int uid,int gid)
     {
+        select_g_memebers_uid(std::to_string(uid)).getrow();
         std::vector<string> res1;
         std::vector<string> res2;
         auto tmp=select_g_memebers_gid(std::to_string(gid));
@@ -438,54 +442,57 @@ public:
     }
     bool g_addmanager(int uid,int gid,int manager)
     {
-        if(std::stoi(select_g_info(std::to_string(gid)).getrow()[1])==uid&&
+        if(std::stoi(select_g_info(std::to_string(gid)).getrow(2)[1])==uid&&
             select_g_memebers_gid(std::to_string(gid),std::to_string(manager)).row_num()!=0)
         {
-            return update_g_members(std::to_string(gid),std::to_string(uid),"1");
+            return update_g_members(std::to_string(gid),std::to_string(manager),"1");
         }
         else return 0;
     }
     bool g_delmanager(int uid,int gid,int manager)
     {
-        if(std::stoi(select_g_info(std::to_string(gid)).getrow()[1])==uid&&
+        if(std::stoi(select_g_info(std::to_string(gid)).getrow(2)[1])==uid&&
             select_g_memebers_gid(std::to_string(gid),std::to_string(manager)).row_num()!=0)
         {
-           return update_g_members(std::to_string(gid),std::to_string(uid),"0");
+           return update_g_members(std::to_string(gid),std::to_string(manager),"0");
         }
         else return 0;
     }
     std::vector<std::vector<string>> g_m_history(int uid,int gid)
     {
+        select_g_memebers_uid(std::to_string(uid)).getrow();
         std::vector<string> tmp1;
         std::vector<string> tmp2;
         std::vector<string> tmp3;
-        if(select_g_memebers_gid(std::to_string(gid),std::to_string(uid)).row_num()==0)return {tmp1,tmp2};
+        if(select_g_memebers_gid(std::to_string(gid),std::to_string(uid)).row_num()==0)return {tmp1,tmp2,tmp3};
         auto res=select_g_messages(std::to_string(gid));
         for(auto tmp=res.getrow();tmp.size()!=0;tmp=res.getrow())
         {
             tmp1.push_back(tmp[2]);
             tmp2.push_back(tmp[3]);
-            tmp3.push_back(tmp[0]);
+            tmp3.push_back(tmp[1]);
         }
         return {tmp3,tmp1,tmp2};
     }
     std::vector<std::vector<string>> g_f_history0(int uid,int gid)
     {
+        select_g_memebers_uid(std::to_string(uid)).getrow();
         std::vector<string> tmp1;
         std::vector<string> tmp2;
         std::vector<string> tmp3;
-        if(select_g_memebers_gid(std::to_string(gid),std::to_string(uid)).row_num()==0)return {tmp1,tmp2};
+        if(select_g_memebers_gid(std::to_string(gid),std::to_string(uid)).row_num()==0)return {tmp1,tmp2,tmp3};
         auto res=select_g_files(std::to_string(gid));
         for(auto tmp=res.getrow();tmp.size()!=0;tmp=res.getrow())
         {
             tmp1.push_back(tmp[3]);
             tmp2.push_back(tmp[2]);
-            tmp3.push_back(tmp[0]);
+            tmp3.push_back(tmp[1]);
         }
         return {tmp3,tmp2,tmp1};
     }
     std::vector<std::vector<string>> g_f_history1(int uid,int gid,const string&file_name)
     {
+        select_g_memebers_uid(std::to_string(uid)).getrow();
         std::vector<string> tmp1;
         std::vector<string> tmp2;
         std::vector<string> tmp3;
@@ -497,7 +504,7 @@ public:
             tmp1.push_back(tmp[2]);
             tmp2.push_back(tmp[3]);
             tmp3.push_back(tmp[4]);
-            tmp4.push_back(tmp[0]);
+            tmp4.push_back(tmp[1]);
         }
         return {tmp4,tmp3,tmp1,tmp2};
     }
@@ -529,7 +536,7 @@ private:
     {
         if(file_name.size()==0)return save_mysql.s_f_wh_or("uid,fri_uid,time,file_name","u_files",
                                 "(uid="+uid+" and fri_uid="+fri_uid+")or(uid="+fri_uid+" and fri_uid="+uid+")","time");
-        else return save_mysql.s_f_wh_or("uid,fri_uid,file,time,file_name","u_files",
+        else return save_mysql.s_f_wh_or("uid,fri_uid,file_len,time,file_name","u_files",
                                 "((uid="+uid+" and fri_uid="+fri_uid+")or(uid="+fri_uid+" and fri_uid="+uid+"))and file_name=\'"+file_name+"\'","time");
     }
 
@@ -554,10 +561,10 @@ private:
         return save_mysql.i_type_val("u_messages","uid,fri_uid,message,time",
                                 uid+","+fri_uid+",\'"+message+"\',\'"+time+"\'");
     }
-    bool insert_u_files(const string &uid,const string &fri_uid,const string &file,const string &time,const string&file_name)
+    bool insert_u_files(const string &uid,const string &fri_uid,const string &file_len,const string &time,const string&file_name)
     {
-        return save_mysql.i_type_val("u_files","uid,fri_uid,file,time,file_name",
-                                uid+","+fri_uid+",\'"+file+"\',\'"+time+"\',\'"+file_name+"\'");
+        return save_mysql.i_type_val("u_files","uid,fri_uid,file_len,time,file_name",
+                                uid+","+fri_uid+",\'"+file_len+"\',\'"+time+"\',\'"+file_name+"\'");
     }
 
     bool delete_u_info(const string&uid)
@@ -663,7 +670,7 @@ private:
     mysql_res select_g_files(const string &gid,const string& file_name="")
     {
         if(file_name.size()==0)return save_mysql.s_f_wh_or("gid,uid,time,file_name","g_files","gid="+gid,"time");
-        else return save_mysql.s_f_wh_or("gid,uid,file,time,file_name","g_files","gid="+gid+" and file_name=\'"+file_name+"\'","time");
+        else return save_mysql.s_f_wh_or("gid,uid,file_len,time,file_name","g_files","gid="+gid+" and file_name=\'"+file_name+"\'","time");
     }
 
     bool insert_g_memebers(const string &gid,const string &uid,const string &is_manager)
@@ -686,10 +693,10 @@ private:
         return save_mysql.i_type_val("g_messages","gid,uid,message,time",
                                     gid+","+uid+",\'"+message+"\',\'"+time+"\'");
     }
-    bool insert_g_files(const string &gid,const string &uid,const string &file,const string &time,const string &file_name)
+    bool insert_g_files(const string &gid,const string &uid,const string &file_len,const string &time,const string &file_name)
     {
-        return save_mysql.i_type_val("g_files","gid,uid,file,time,file_name",
-                                    gid+","+uid+",\'"+file+"\',\'"+time+"\',\'"+file_name+"\'");
+        return save_mysql.i_type_val("g_files","gid,uid,file_len,time,file_name",
+                                    gid+","+uid+",\'"+file_len+"\',\'"+time+"\',\'"+file_name+"\'");
     }
 
     bool delete_g_members_gid(const string &gid,const string &uid="")

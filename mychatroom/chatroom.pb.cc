@@ -180,8 +180,9 @@ inline constexpr File::Impl_::Impl_(
         obj_{},
         _obj_cached_byte_size_{0},
         name_{},
-        context_{},
         date_{},
+        len_{},
+        _len_cached_byte_size_{0},
         gid_{0} {}
 
 template <typename>
@@ -228,8 +229,8 @@ const ::uint32_t TableStruct_chatroom_2eproto::offsets[] PROTOBUF_SECTION_VARIAB
     ~0u,  // no sizeof(Split)
     PROTOBUF_FIELD_OFFSET(::chatroom::File, _impl_.obj_),
     PROTOBUF_FIELD_OFFSET(::chatroom::File, _impl_.name_),
-    PROTOBUF_FIELD_OFFSET(::chatroom::File, _impl_.context_),
     PROTOBUF_FIELD_OFFSET(::chatroom::File, _impl_.date_),
+    PROTOBUF_FIELD_OFFSET(::chatroom::File, _impl_.len_),
     PROTOBUF_FIELD_OFFSET(::chatroom::File, _impl_.gid_),
     ~0u,
     ~0u,
@@ -336,40 +337,40 @@ const char descriptor_table_protodef_chatroom_2eproto[] PROTOBUF_SECTION_VARIABL
     "\n\016chatroom.proto\022\010chatroom\"d\n\004Head\022\017\n\002is"
     "\030\001 \001(\010H\000\210\001\001\022!\n\004type\030\002 \001(\0162\016.chatroom.Typ"
     "eH\001\210\001\001\022\020\n\003len\030\003 \001(\005H\002\210\001\001B\005\n\003_isB\007\n\005_type"
-    "B\006\n\004_len\"Z\n\004File\022\013\n\003obj\030\001 \003(\005\022\014\n\004name\030\002 "
-    "\003(\t\022\017\n\007context\030\003 \003(\014\022\014\n\004date\030\004 \003(\t\022\020\n\003gi"
-    "d\030\005 \001(\005H\000\210\001\001B\006\n\004_gid\"O\n\007Message\022\013\n\003obj\030\001"
-    " \003(\005\022\017\n\007context\030\002 \003(\t\022\014\n\004date\030\003 \003(\t\022\020\n\003g"
-    "id\030\004 \001(\005H\000\210\001\001B\006\n\004_gid\"g\n\013Signup_info\022\020\n\003"
-    "uid\030\001 \001(\005H\000\210\001\001\022\021\n\004name\030\002 \001(\tH\001\210\001\001\022\025\n\010pas"
-    "sword\030\003 \001(\tH\002\210\001\001B\006\n\004_uidB\007\n\005_nameB\013\n\t_pa"
-    "ssword\"J\n\nLogin_info\022\020\n\003uid\030\001 \001(\005H\000\210\001\001\022\025"
-    "\n\010password\030\002 \001(\tH\001\210\001\001B\006\n\004_uidB\013\n\t_passwo"
-    "rd\"A\n\tGroup_uid\022\020\n\003uid\030\001 \001(\005H\000\210\001\001\022\021\n\004nam"
-    "e\030\002 \001(\tH\001\210\001\001B\006\n\004_uidB\007\n\005_name\"\021\n\003IDs\022\n\n\002"
-    "id\030\001 \003(\005\"\023\n\004Strs\022\013\n\003str\030\001 \003(\t*\344\004\n\004Type\022\013"
-    "\n\007nothing\020\000\022\t\n\005login\020\001\022\n\n\006signup\020\002\022\n\n\006lo"
-    "gout\020\003\022\014\n\010u_search\020\004\022\r\n\tu_request\020\005\022\r\n\tu"
-    "_listreq\020\006\022\t\n\005u_add\020\007\022\t\n\005u_del\020\010\022\n\n\006u_bl"
-    "ok\020\t\022\014\n\010u_unblok\020\n\022\r\n\tu_message\020\013\022\n\n\006u_f"
-    "ile\020\014\022\017\n\013u_m_history\020\r\022\020\n\014u_f_history0\020\016"
-    "\022\020\n\014u_f_history1\020\017\022\014\n\010g_create\020\020\022\014\n\010g_di"
-    "sban\020\021\022\r\n\tg_request\020\022\022\r\n\tg_listreq\020\023\022\t\n\005"
-    "g_add\020\024\022\t\n\005g_del\020\025\022\014\n\010g_search\020\026\022\r\n\tg_me"
-    "ssage\020\027\022\n\n\006g_file\020\030\022\n\n\006g_quit\020\031\022\r\n\tg_mem"
-    "bers\020\032\022\020\n\014g_addmanager\020\033\022\020\n\014g_delmanager"
-    "\020\034\022\017\n\013g_m_history\020\035\022\020\n\014g_f_history0\020\036\022\020\n"
-    "\014g_f_history1\020\037\022\020\n\014notify_u_req\020 \022\016\n\nnot"
-    "ify_u_m\020!\022\016\n\nnotify_u_f\020\"\022\020\n\014notify_g_re"
-    "q\020#\022\016\n\nnotify_g_m\020$\022\016\n\nnotify_g_f\020%\022\r\n\tg"
-    "_confirm\020&\022\017\n\013fri_confirm\020\'\022\017\n\013heart_che"
-    "ck\020(b\006proto3"
+    "B\006\n\004_len\"V\n\004File\022\013\n\003obj\030\001 \003(\005\022\014\n\004name\030\002 "
+    "\003(\t\022\014\n\004date\030\004 \003(\t\022\013\n\003len\030\005 \003(\003\022\020\n\003gid\030\006 "
+    "\001(\005H\000\210\001\001B\006\n\004_gid\"O\n\007Message\022\013\n\003obj\030\001 \003(\005"
+    "\022\017\n\007context\030\002 \003(\t\022\014\n\004date\030\003 \003(\t\022\020\n\003gid\030\004"
+    " \001(\005H\000\210\001\001B\006\n\004_gid\"g\n\013Signup_info\022\020\n\003uid\030"
+    "\001 \001(\005H\000\210\001\001\022\021\n\004name\030\002 \001(\tH\001\210\001\001\022\025\n\010passwor"
+    "d\030\003 \001(\tH\002\210\001\001B\006\n\004_uidB\007\n\005_nameB\013\n\t_passwo"
+    "rd\"J\n\nLogin_info\022\020\n\003uid\030\001 \001(\005H\000\210\001\001\022\025\n\010pa"
+    "ssword\030\002 \001(\tH\001\210\001\001B\006\n\004_uidB\013\n\t_password\"A"
+    "\n\tGroup_uid\022\020\n\003uid\030\001 \001(\005H\000\210\001\001\022\021\n\004name\030\002 "
+    "\001(\tH\001\210\001\001B\006\n\004_uidB\007\n\005_name\"\021\n\003IDs\022\n\n\002id\030\001"
+    " \003(\005\"\023\n\004Strs\022\013\n\003str\030\001 \003(\t*\344\004\n\004Type\022\013\n\007no"
+    "thing\020\000\022\t\n\005login\020\001\022\n\n\006signup\020\002\022\n\n\006logout"
+    "\020\003\022\014\n\010u_search\020\004\022\r\n\tu_request\020\005\022\r\n\tu_lis"
+    "treq\020\006\022\t\n\005u_add\020\007\022\t\n\005u_del\020\010\022\n\n\006u_blok\020\t"
+    "\022\014\n\010u_unblok\020\n\022\r\n\tu_message\020\013\022\n\n\006u_file\020"
+    "\014\022\017\n\013u_m_history\020\r\022\020\n\014u_f_history0\020\016\022\020\n\014"
+    "u_f_history1\020\017\022\014\n\010g_create\020\020\022\014\n\010g_disban"
+    "\020\021\022\r\n\tg_request\020\022\022\r\n\tg_listreq\020\023\022\t\n\005g_ad"
+    "d\020\024\022\t\n\005g_del\020\025\022\014\n\010g_search\020\026\022\r\n\tg_messag"
+    "e\020\027\022\n\n\006g_file\020\030\022\n\n\006g_quit\020\031\022\r\n\tg_members"
+    "\020\032\022\020\n\014g_addmanager\020\033\022\020\n\014g_delmanager\020\034\022\017"
+    "\n\013g_m_history\020\035\022\020\n\014g_f_history0\020\036\022\020\n\014g_f"
+    "_history1\020\037\022\020\n\014notify_u_req\020 \022\016\n\nnotify_"
+    "u_m\020!\022\016\n\nnotify_u_f\020\"\022\020\n\014notify_g_req\020#\022"
+    "\016\n\nnotify_g_m\020$\022\016\n\nnotify_g_f\020%\022\r\n\tg_con"
+    "firm\020&\022\017\n\013fri_confirm\020\'\022\017\n\013heart_check\020("
+    "b\006proto3"
 };
 static ::absl::once_flag descriptor_table_chatroom_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_chatroom_2eproto = {
     false,
     false,
-    1212,
+    1208,
     descriptor_table_protodef_chatroom_2eproto,
     "chatroom.proto",
     &descriptor_table_chatroom_2eproto_once,
@@ -687,8 +688,9 @@ inline PROTOBUF_NDEBUG_INLINE File::Impl_::Impl_(
         obj_{visibility, arena, from.obj_},
         _obj_cached_byte_size_{0},
         name_{visibility, arena, from.name_},
-        context_{visibility, arena, from.context_},
-        date_{visibility, arena, from.date_} {}
+        date_{visibility, arena, from.date_},
+        len_{visibility, arena, from.len_},
+        _len_cached_byte_size_{0} {}
 
 File::File(
     ::google::protobuf::Arena* arena,
@@ -710,8 +712,9 @@ inline PROTOBUF_NDEBUG_INLINE File::Impl_::Impl_(
         obj_{visibility, arena},
         _obj_cached_byte_size_{0},
         name_{visibility, arena},
-        context_{visibility, arena},
-        date_{visibility, arena} {}
+        date_{visibility, arena},
+        len_{visibility, arena},
+        _len_cached_byte_size_{0} {}
 
 inline void File::SharedCtor(::_pb::Arena* arena) {
   new (&_impl_) Impl_(internal_visibility(), arena);
@@ -736,8 +739,8 @@ PROTOBUF_NOINLINE void File::Clear() {
 
   _impl_.obj_.Clear();
   _impl_.name_.Clear();
-  _impl_.context_.Clear();
   _impl_.date_.Clear();
+  _impl_.len_.Clear();
   _impl_.gid_ = 0;
   _impl_._has_bits_.Clear();
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
@@ -755,9 +758,9 @@ const ::_pbi::TcParseTable<3, 5, 0, 30, 2> File::_table_ = {
   {
     PROTOBUF_FIELD_OFFSET(File, _impl_._has_bits_),
     0, // no _extensions_
-    5, 56,  // max_field_number, fast_idx_mask
+    6, 56,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294967264,  // skipmap
+    4294967236,  // skipmap
     offsetof(decltype(_table_), field_entries),
     5,  // num_field_entries
     0,  // num_aux_entries
@@ -772,16 +775,16 @@ const ::_pbi::TcParseTable<3, 5, 0, 30, 2> File::_table_ = {
     // repeated string name = 2;
     {::_pbi::TcParser::FastUR1,
      {18, 63, 0, PROTOBUF_FIELD_OFFSET(File, _impl_.name_)}},
-    // repeated bytes context = 3;
-    {::_pbi::TcParser::FastBR1,
-     {26, 63, 0, PROTOBUF_FIELD_OFFSET(File, _impl_.context_)}},
+    {::_pbi::TcParser::MiniParse, {}},
     // repeated string date = 4;
     {::_pbi::TcParser::FastUR1,
      {34, 63, 0, PROTOBUF_FIELD_OFFSET(File, _impl_.date_)}},
-    // optional int32 gid = 5;
+    // repeated int64 len = 5;
+    {::_pbi::TcParser::FastV64P1,
+     {42, 63, 0, PROTOBUF_FIELD_OFFSET(File, _impl_.len_)}},
+    // optional int32 gid = 6;
     {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(File, _impl_.gid_), 0>(),
-     {40, 0, 0, PROTOBUF_FIELD_OFFSET(File, _impl_.gid_)}},
-    {::_pbi::TcParser::MiniParse, {}},
+     {48, 0, 0, PROTOBUF_FIELD_OFFSET(File, _impl_.gid_)}},
     {::_pbi::TcParser::MiniParse, {}},
   }}, {{
     65535, 65535
@@ -792,19 +795,19 @@ const ::_pbi::TcParseTable<3, 5, 0, 30, 2> File::_table_ = {
     // repeated string name = 2;
     {PROTOBUF_FIELD_OFFSET(File, _impl_.name_), -1, 0,
     (0 | ::_fl::kFcRepeated | ::_fl::kUtf8String | ::_fl::kRepSString)},
-    // repeated bytes context = 3;
-    {PROTOBUF_FIELD_OFFSET(File, _impl_.context_), -1, 0,
-    (0 | ::_fl::kFcRepeated | ::_fl::kBytes | ::_fl::kRepSString)},
     // repeated string date = 4;
     {PROTOBUF_FIELD_OFFSET(File, _impl_.date_), -1, 0,
     (0 | ::_fl::kFcRepeated | ::_fl::kUtf8String | ::_fl::kRepSString)},
-    // optional int32 gid = 5;
+    // repeated int64 len = 5;
+    {PROTOBUF_FIELD_OFFSET(File, _impl_.len_), -1, 0,
+    (0 | ::_fl::kFcRepeated | ::_fl::kPackedInt64)},
+    // optional int32 gid = 6;
     {PROTOBUF_FIELD_OFFSET(File, _impl_.gid_), _Internal::kHasBitsOffset + 0, 0,
     (0 | ::_fl::kFcOptional | ::_fl::kInt32)},
   }},
   // no aux_entries
   {{
-    "\15\0\4\0\4\0\0\0"
+    "\15\0\4\4\0\0\0\0"
     "chatroom.File"
     "name"
     "date"
@@ -835,12 +838,6 @@ const ::_pbi::TcParseTable<3, 5, 0, 30, 2> File::_table_ = {
     target = stream->WriteString(2, s, target);
   }
 
-  // repeated bytes context = 3;
-  for (int i = 0, n = this->_internal_context_size(); i < n; ++i) {
-    const auto& s = this->_internal_context().Get(i);
-    target = stream->WriteBytes(3, s, target);
-  }
-
   // repeated string date = 4;
   for (int i = 0, n = this->_internal_date_size(); i < n; ++i) {
     const auto& s = this->_internal_date().Get(i);
@@ -849,11 +846,20 @@ const ::_pbi::TcParseTable<3, 5, 0, 30, 2> File::_table_ = {
     target = stream->WriteString(4, s, target);
   }
 
+  // repeated int64 len = 5;
+  {
+    int byte_size = _impl_._len_cached_byte_size_.Get();
+    if (byte_size > 0) {
+      target = stream->WriteInt64Packed(
+          5, _internal_len(), byte_size, target);
+    }
+  }
+
   cached_has_bits = _impl_._has_bits_[0];
-  // optional int32 gid = 5;
+  // optional int32 gid = 6;
   if (cached_has_bits & 0x00000001u) {
     target = ::google::protobuf::internal::WireFormatLite::
-        WriteInt32ToArrayWithField<5>(
+        WriteInt32ToArrayWithField<6>(
             stream, this->_internal_gid(), target);
   }
 
@@ -893,19 +899,26 @@ const ::_pbi::TcParseTable<3, 5, 0, 30, 2> File::_table_ = {
     total_size += ::google::protobuf::internal::WireFormatLite::StringSize(
         _internal_name().Get(i));
   }
-  // repeated bytes context = 3;
-  total_size += 1 * ::google::protobuf::internal::FromIntSize(_internal_context().size());
-  for (int i = 0, n = _internal_context().size(); i < n; ++i) {
-    total_size += ::google::protobuf::internal::WireFormatLite::BytesSize(
-        _internal_context().Get(i));
-  }
   // repeated string date = 4;
   total_size += 1 * ::google::protobuf::internal::FromIntSize(_internal_date().size());
   for (int i = 0, n = _internal_date().size(); i < n; ++i) {
     total_size += ::google::protobuf::internal::WireFormatLite::StringSize(
         _internal_date().Get(i));
   }
-  // optional int32 gid = 5;
+  // repeated int64 len = 5;
+  {
+    std::size_t data_size = ::_pbi::WireFormatLite::Int64Size(
+        this->_internal_len())
+    ;
+    _impl_._len_cached_byte_size_.Set(::_pbi::ToCachedSize(data_size));
+    std::size_t tag_size = data_size == 0
+        ? 0
+        : 1 + ::_pbi::WireFormatLite::Int32Size(
+                            static_cast<int32_t>(data_size))
+    ;
+    total_size += tag_size + data_size;
+  }
+  // optional int32 gid = 6;
   cached_has_bits = _impl_._has_bits_[0];
   if (cached_has_bits & 0x00000001u) {
     total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
@@ -933,8 +946,8 @@ void File::MergeImpl(::google::protobuf::Message& to_msg, const ::google::protob
 
   _this->_internal_mutable_obj()->MergeFrom(from._internal_obj());
   _this->_internal_mutable_name()->MergeFrom(from._internal_name());
-  _this->_internal_mutable_context()->MergeFrom(from._internal_context());
   _this->_internal_mutable_date()->MergeFrom(from._internal_date());
+  _this->_internal_mutable_len()->MergeFrom(from._internal_len());
   if ((from._impl_._has_bits_[0] & 0x00000001u) != 0) {
     _this->_internal_set_gid(from._internal_gid());
   }
@@ -961,8 +974,8 @@ void File::InternalSwap(File* PROTOBUF_RESTRICT other) {
   swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
   _impl_.obj_.InternalSwap(&other->_impl_.obj_);
   _impl_.name_.InternalSwap(&other->_impl_.name_);
-  _impl_.context_.InternalSwap(&other->_impl_.context_);
   _impl_.date_.InternalSwap(&other->_impl_.date_);
+  _impl_.len_.InternalSwap(&other->_impl_.len_);
         swap(_impl_.gid_, other->_impl_.gid_);
 }
 

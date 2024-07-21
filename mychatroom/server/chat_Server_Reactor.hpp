@@ -11,6 +11,10 @@
 #include"chat_Server_Save.hpp"
 #include"../chatroom.pb.h"
 #include<mutex>
+#include<iostream>
+#include <sys/sendfile.h>
+#include<sys/stat.h>
+#include<fcntl.h>
 #define maxlen 65536
 #define maxhead_len 10
 
@@ -47,6 +51,7 @@ public:
         uid_ulock.lock();
         uid_map.insert({uid,fd});
         uid_ulock.unlock();
+        offset.reset(new off_t(0));
     }
     ~Clannel_checked(){}
     void deal();
@@ -59,6 +64,9 @@ private:
     static std::map<int,int> uid_map;
     static std::mutex uid_mtx;
     std::unique_lock<std::mutex> uid_ulock;
+    long need_recv;
+    long need_send;
+    unique_ptr<off_t> offset;
 };
 std::map<int,int> Clannel_checked::uid_map;
 std::mutex Clannel_checked::uid_mtx;
@@ -74,8 +82,7 @@ private:
     void _send(Type type,bool is,int id=0,std::vector<string> v={});
     void quit();
 };
-struct fd_key
-{
+struct fd_key{
     fd_key()=default;
     fd_key(Clannel*ptr,bool is):clannel(ptr),heart(is){}
     std::shared_ptr<Clannel> clannel;
@@ -208,13 +215,13 @@ bool Clannel::recv_cache()
     if(head.has_type()==0)
     {
         char head_len=0;
-        if(recv(fd,&head_len,sizeof(head_len),MSG_DONTWAIT)!=sizeof(head_len)||head_len>maxhead_len||head_len<0)
+        if(recv(fd,&head_len,sizeof(head_len),MSG_DONTWAIT)!=sizeof(head_len)||head_len>maxhead_len||head_len<0)//非法客户端
         {
             quit();
             return 0;
         }
         char headstr[head_len];
-        if(recv(fd,headstr,head_len,MSG_DONTWAIT)<head_len)
+        if(recv(fd,headstr,head_len,MSG_DONTWAIT)<head_len)//非法客户端
         {
             quit();
             return 0;
@@ -239,8 +246,7 @@ bool Clannel::recv_cache()
             cache.assign(tmp,tmp_len);
             return 1;
         }
-    }
-    else
+    }else if((head.len()-cache.size())>0)
     {
         char tmp[head.len()-cache.size()];
         int tmp_len;
@@ -255,6 +261,8 @@ bool Clannel::recv_cache()
             cache.append(tmp,tmp_len);
             return 1;
         }
+    }else{
+        return 1;
     }
 }
 void Clannel::reset()
@@ -278,7 +286,7 @@ void set_File(string*s_ptr,const std::vector<int> &obj={},const std::vector<stri
     chatroom::File _File;
     for(auto &tmp:obj)_File.add_obj(tmp);
     for(auto &tmp:name)_File.add_name(tmp);
-    for(auto &tmp:context)_File.add_context(tmp);
+    for(auto &tmp:context)_File.add_len(std::stoi(tmp));
     for(auto &tmp:date)_File.add_date(tmp);
     if(gid!=0)_File.set_gid(gid);
     _File.SerializePartialToString(s_ptr);
@@ -289,7 +297,7 @@ void set_Message(string*s_ptr,const std::vector<int>&obj={},const std::vector<st
     for(auto &tmp:obj)_Message.add_obj(tmp);
     for(auto &tmp:context)_Message.add_context(tmp);
     for(auto &tmp:date)_Message.add_date(tmp);
-    if(gid!=0)_Message.set_gid(0);
+    if(gid!=0)_Message.set_gid(gid);
     _Message.SerializePartialToString(s_ptr);
 }
 void set_IDs(string*s_ptr,const std::vector<int>&id={})
@@ -329,6 +337,38 @@ void set_Strs(string*s_ptr,const std::vector<string>&str)
 
 
 //Clannel_checked
+bool rm_in_chatroom(string fname,int id1,int id2=0){
+    if(id2=0){
+        return remove(("/var/lib/chatroom_files/g"+std::to_string(id1)).c_str());
+    }else{
+        if (remove(("/var/lib/chatroom_files/u"+std::to_string(id1)+std::to_string(id2)+fname).c_str())==-1){
+            return remove(("/var/lib/chatroom_files/u"+std::to_string(id2)+std::to_string(id1)+fname).c_str());
+        }else{
+            return true;
+        }
+    }
+}
+long append_in_chatroom(const void*tmp, size_t count,string fname,int id1,int id2=0){
+    int fd=-1;
+    if(id2==0){
+        fd=open(("/var/lib/chatroom_files/g"+std::to_string(id1)+fname).c_str(),O_WRONLY|O_CREAT|O_APPEND,0664);
+    }else{
+        fd=open(("/var/lib/chatroom_files/u"+std::to_string(id1)+std::to_string(id2)+fname).c_str(),O_WRONLY|O_CREAT|O_APPEND,0664);
+        if (fd<0)
+        {
+            open(("/var/lib/chatroom_files/u"+std::to_string(id2)+std::to_string(id1)+fname).c_str(),O_WRONLY|O_CREAT|O_APPEND,0664);
+        }
+    }
+    int ret=0;
+    if(fd>=0){
+        ret=write(fd,tmp,count);
+        close(fd);
+    }
+    if(ret<=0){
+        std::cerr<<"368 "<<errno<<std::endl;
+    }
+    return ret;
+}
 void  Clannel_checked::realsend(const string&sendstr,bool is,Type type)
 {
     string sendhead;
@@ -418,7 +458,7 @@ void Clannel_checked::_send(Type type,bool is,std::vector<string> v0,std::vector
             break;
 
         case Type::g_listreq:
-            set_Strs(&sendstr,v1);
+            set_Strs(&sendstr,v0);
             realsend(sendstr, is, Type::g_listreq);
             break;
 
@@ -544,283 +584,424 @@ void Clannel_checked::deal()
             // std::cerr<<head.DebugString();
             int tmpi;
             bool is=1;
-            switch (head.type())
-            {
-                case Type::u_search:
-                    tmpvv=reactor->DB.u_search(uid);
-                    if(reactor->DB.mysql_iserr())is=0;
-                    _send(Type::u_search,is,tmpvv[0],tmpvv[1]);
-                    break;
+            long recvd;
+            bool ret=0;
+            long tmp;
+            int sfd=-1;
+            try{
+                unique_ptr<char[]> ptr;
+                switch (head.type())
+                {
+                    case Type::u_search:
+                        tmpvv=reactor->DB.u_search(uid);
+                        if(reactor->DB.mysql_iserr())is=0;
+                        _send(Type::u_search,is,tmpvv[0],tmpvv[1]);
+                        break;
 
-                case Type::u_request:
-                    _id.ParseFromString(cache);
-                    is=reactor->DB.u_request(uid,_id.id(0));
-                    _send(Type::u_request,is);
-                    if(is)
-                    {
-                        for(auto&tmp:reactor->reactors)
+                    case Type::u_request:
+                        _id.ParseFromString(cache);
+                        is=reactor->DB.u_request(uid,_id.id(0));
+                        _send(Type::u_request,is);
+                        if(is)
                         {
-                            try{
-                                tmp->fd_map.at(uid_map.at(_id.id(0))).clannel->
-                                _send(Type::notify_u_req,is,{},{},{},{},uid);
-                            }catch(std::out_of_range){}
-                        }
-                    }
-                    break;
-
-                case Type::u_listreq:
-                    tmpv = reactor->DB.u_listreq(uid);
-                    if(reactor->DB.mysql_iserr())is = 0;
-                    _send(Type::u_listreq, is, tmpv);
-                    break;
-
-                case Type::u_add:
-                    _id.ParseFromString(cache);
-                    is=reactor->DB.u_add(uid,_id.id(0));
-                    _send(Type::u_add,is);
-                    break;
-
-                case Type::u_del:
-                    _id.ParseFromString(cache);
-                    is=reactor->DB.u_del(uid,_id.id(0));
-                    _send(Type::u_del,is);
-                    break;
-
-                case Type::u_blok:
-                    _id.ParseFromString(cache);
-                    is=reactor->DB.u_blok(uid,_id.id(0));
-                    _send(Type::u_blok,is);
-                    break;
-
-                case Type::u_unblok:
-                    _id.ParseFromString(cache);
-                    is=reactor->DB.u_unblok(uid,_id.id(0));
-                    _send(Type::u_unblok,is);
-                    break;
-
-                case Type::u_message:
-                    _mess.ParseFromString(cache);
-                    is=reactor->DB.u_message(uid,_mess.obj(0),_mess.context(0));
-                    _send(Type::u_message,is);
-                    if(is)
-                    {
-                        for(auto&tmp:reactor->reactors)
-                        {
-                            try{
-                                tmp->fd_map.at(uid_map.at(_mess.obj(0))).clannel->
-                                _send(Type::notify_u_m,is,{_mess.context(0)},{},{},{},uid);
-                            }catch(std::out_of_range){}
-                        }
-                    }
-                    break;
-
-                case Type::u_file:
-                    _file.ParseFromString(cache);
-                    is=reactor->DB.u_file(uid,_file.obj(0),_file.context(0),_file.name(0));
-                    _send(Type::u_file,is);
-                    if(is)
-                    {
-                        for(auto&tmp:reactor->reactors)
-                        {
-                            try{
-                                tmp->fd_map.at(uid_map.at(_file.obj(0))).clannel->
-                                _send(Type::notify_u_f,is,{_file.name(0)},{},{},{},uid);
-                            }catch(std::out_of_range){}
-                        }
-                    }
-                    break;
-
-                case Type::u_m_history:
-                    _id.ParseFromString(cache);
-                    tmpvv = reactor->DB.u_m_history(uid,_id.id(0));
-                    if(reactor->DB.mysql_iserr())is = 0;
-                    _send(Type::u_m_history, is, tmpvv[0], tmpvv[1],tmpvv[2]);
-                    break;
-
-                case Type::u_f_history0:
-                    _id.ParseFromString(cache);
-                    tmpvv = reactor->DB.u_f_history0(uid,_id.id(0));
-                    if(reactor->DB.mysql_iserr())is = 0;
-                    _send(Type::u_f_history0, is, tmpvv[0], tmpvv[1],tmpvv[2]);
-                    break;
-
-                case Type::u_f_history1:
-                    _file.ParseFromString(cache);
-                    tmpvv = reactor->DB.u_f_history1(uid,_file.obj(0),_file.name(0));
-                    if(reactor->DB.mysql_iserr())is = 0;
-                    _send(Type::u_f_history1, is, tmpvv[0],tmpvv[1],tmpvv[2],tmpvv[3]);
-                    break;
-
-                case Type::g_create:
-                    _group.ParseFromString(cache);
-                    tmpi = reactor->DB.g_create(uid,_group.name());
-                    if(tmpi== 0)_send(Type::g_create,0);
-                    _send(Type::g_create,1,{},{},{},{},tmpi);
-                    break;
-
-                case Type::g_disban:
-                    _id.ParseFromString(cache);
-                    is=reactor->DB.g_disban(uid,_id.id(0));
-                    _send(Type::g_disban,is);
-                    break;
-
-                case Type::g_request:
-                    _id.ParseFromString(cache);
-                    is=reactor->DB.g_request(uid,_id.id(0));
-                    _send(Type::g_request,is);
-                    if(is)
-                    {                
-                        auto managers=reactor->DB.g_manager(_id.id(0));
-                        for(auto&tmp:managers)
-                        {
-                            for(auto&tmp2:reactor->reactors)
+                            for(auto&tmp:reactor->reactors)
                             {
                                 try{
-                                    tmp2->fd_map.at(uid_map.at(tmp)).clannel->
-                                    _send(Type::notify_g_req,is,{},{},{},{},uid,_id.id(0));
+                                    tmp->fd_map.at(uid_map.at(_id.id(0))).clannel->
+                                    _send(Type::notify_u_req,is,{},{},{},{},uid);
                                 }catch(std::out_of_range){}
                             }
-                        }  
-                    }
-                    break;
+                        }
+                        break;
 
-                case Type::g_listreq:
-                    _id.ParseFromString(cache);
-                    tmpv = reactor->DB.g_listreq(uid,_id.id(0));
-                    if(reactor->DB.mysql_iserr())is = 0;
-                    _send(Type::g_listreq, is, tmpv);
-                    break;
+                    case Type::u_listreq:
+                        tmpv = reactor->DB.u_listreq(uid);
+                        if(reactor->DB.mysql_iserr())is = 0;
+                        _send(Type::u_listreq, is, tmpv);
+                        break;
 
-                case Type::g_add:
-                    _id.ParseFromString(cache);
-                    is=reactor->DB.g_add(uid,_id.id(0),_id.id(1));
-                    _send(Type::g_add,is);
-                    break;
+                    case Type::u_add:
+                        _id.ParseFromString(cache);
+                        is=reactor->DB.u_add(uid,_id.id(0));
+                        _send(Type::u_add,is);
+                        break;
 
-                case Type::g_del:
-                    _id.ParseFromString(cache);
-                    is=reactor->DB.g_del(uid,_id.id(0),_id.id(1));
-                    _send(Type::g_del,is);
-                    break;
+                    case Type::u_del:
+                        _id.ParseFromString(cache);
+                        is=reactor->DB.u_del(uid,_id.id(0));
+                        _send(Type::u_del,is);
+                        break;
 
-                case Type::g_search:
-                    tmpvv = reactor->DB.g_search(uid);
-                    if(reactor->DB.mysql_iserr())is = 0;
-                    _send(Type::g_search, is, tmpvv[0], tmpvv[1]);
-                    break;
+                    case Type::u_blok:
+                        _id.ParseFromString(cache);
+                        is=reactor->DB.u_blok(uid,_id.id(0));
+                        _send(Type::u_blok,is);
+                        break;
 
-                case Type::g_message:
-                    _mess.ParseFromString(cache);
-                    is=reactor->DB.g_message(uid,_mess.obj(0),_mess.context(0));
-                    _send(Type::g_message,is);
-                    if(is)
-                    {                
-                        auto members=reactor->DB.g_members(_mess.obj(0));
-                        for(auto&tmp:members)
+                    case Type::u_unblok:
+                        _id.ParseFromString(cache);
+                        is=reactor->DB.u_unblok(uid,_id.id(0));
+                        _send(Type::u_unblok,is);
+                        break;
+
+                    case Type::u_message:
+                        _mess.ParseFromString(cache);
+                        is=reactor->DB.u_message(uid,_mess.obj(0),_mess.context(0));
+                        _send(Type::u_message,is);
+                        if(is)
                         {
-                            for(auto&tmp2:reactor->reactors)
+                            for(auto&tmp:reactor->reactors)
                             {
                                 try{
-                                    tmp2->fd_map.at(uid_map.at(tmp)).clannel->
-                                    _send(Type::notify_g_m,is,{_mess.context(0)},{},{},{},uid,_mess.obj(0));
+                                    tmp->fd_map.at(uid_map.at(_mess.obj(0))).clannel->
+                                    _send(Type::notify_u_m,is,{_mess.context(0)},{},{},{},uid);
                                 }catch(std::out_of_range){}
                             }
-                        }  
-                    }
-                    break;
+                        }
+                        break;
 
-                case Type::g_file:
-                    _file.ParseFromString(cache);
-                    is=reactor->DB.g_file(uid,_file.obj(0),_file.name(0),_file.context(0));
-                    _send(Type::g_file,is);
-                    if(is)
-                    {                
-                        auto members=reactor->DB.g_members(_file.obj(0));
-                        for(auto&tmp:members)
+                    case Type::u_file:
+                        _file.ParseFromString(cache);
+                        ptr.reset(new char[5000]);
+                        if (need_recv==0){
+                            rm_in_chatroom(_file.name(0),uid,_file.obj(0));
+                            need_recv=_file.len(0);
+                        }
+                        while(need_recv!=0){
+                            if(need_recv>5000){
+                                recvd=recv(fd,ptr.get(),5000,MSG_DONTWAIT);
+                                if (recvd<5000){
+                                    ret=1;
+                                }
+                            }else{
+                                recvd=recv(fd,ptr.get(),need_recv,MSG_DONTWAIT);
+                                if (recvd<need_recv){
+                                    ret=1;
+                                }
+                            }
+                            if(recvd>0){
+                                tmp=append_in_chatroom(ptr.get(),recvd,_file.name(0),uid,_file.obj(0));
+                                if (tmp<recvd){
+                                    rm_in_chatroom(_file.name(0),uid,_file.obj(0));
+                                    is=0;
+                                    break;
+                                }else{
+                                    need_recv-=tmp;
+                                }
+                            }else{
+                                rm_in_chatroom(_file.name(0),uid,_file.obj(0));
+                                is=0;
+                                break;
+                            }
+                            
+                            if(ret){
+                                return;
+                            }
+                        }
+                        
+                        if(is){
+                            is=reactor->DB.u_file(uid,_file.obj(0),_file.len(0),_file.name(0));
+                        }
+                        _send(Type::u_file,is);
+                        if(is)
                         {
-                            for(auto&tmp2:reactor->reactors)
+                            for(auto&tmp:reactor->reactors)
                             {
                                 try{
-                                    tmp2->fd_map.at(uid_map.at(tmp)).clannel->
-                                    _send(Type::notify_g_f,is,{_file.name(0)},{},{},{},uid,_file.obj(0));
-                                }catch(std::out_of_range){}
+                                    tmp->fd_map.at(uid_map.at(_file.obj(0))).clannel->
+                                    _send(Type::notify_u_f,is,{_file.name(0)},{},{},{},uid);                                    }catch(std::out_of_range){}
+                                }
+                        }
+                        break;
+
+                    case Type::u_m_history:
+                        _id.ParseFromString(cache);
+                        tmpvv = reactor->DB.u_m_history(uid,_id.id(0));
+                        if(reactor->DB.mysql_iserr())is = 0;
+                        _send(Type::u_m_history, is, tmpvv[0], tmpvv[1],tmpvv[2]);
+                        break;
+
+                    case Type::u_f_history0:
+                        _id.ParseFromString(cache);
+                        tmpvv = reactor->DB.u_f_history0(uid,_id.id(0));
+                        if(reactor->DB.mysql_iserr())is = 0;
+                        _send(Type::u_f_history0, is, tmpvv[0], tmpvv[1],tmpvv[2]);
+                        break;
+
+                    case Type::u_f_history1:
+                        _file.ParseFromString(cache);
+                        if(need_send==0){
+                            tmpvv = reactor->DB.u_f_history1(uid,_file.obj(0),_file.name(0));
+                            if(reactor->DB.mysql_iserr())is = 0;
+                            _send(Type::u_f_history1, is, tmpvv[0],tmpvv[1],tmpvv[2],tmpvv[3]);
+                        
+                        }
+
+                        sfd=open(("/var/lib/chatroom_files/u"+std::to_string(uid)+std::to_string(_file.obj(0))+_file.name(0)).c_str(),O_RDONLY);
+                        if(sfd<0){
+                            sfd=open(("/var/lib/chatroom_files/u"+std::to_string(_file.obj(0))+std::to_string(uid)+_file.name(0)).c_str(),O_RDONLY);
+                        }
+                        if(sfd>=0){
+                            tmp=sendfile64(fd,sfd,offset.get(),need_send);
+                            if(tmp>=0){
+                                need_send-=tmp;
+                                if(need_send>0){
+                                    quit();
+                                }
+                            }else{
+                                quit();
                             }
-                        }  
-                    }
-                    break;
+                            close(sfd);
+                        }
+                        break;
 
-                case Type::g_quit:
-                    _id.ParseFromString(cache);
-                    is=reactor->DB.g_quit(uid,_id.id(0));
-                    _send(Type::g_quit,is);
-                    break;
+                    case Type::g_create:
+                        _group.ParseFromString(cache);
+                        tmpi = reactor->DB.g_create(uid,_group.name());
+                        if(tmpi== 0)_send(Type::g_create,0);
+                        _send(Type::g_create,1,{},{},{},{},tmpi);
+                        break;
 
-                case Type::g_members:
-                    _id.ParseFromString(cache);
-                    tmpvv = reactor->DB.g_members(uid,_id.id(0));
-                    if(reactor->DB.mysql_iserr())is = 0;
-                    _send(Type::g_members, is, tmpvv[0], tmpvv[1]);
-                    break;
+                    case Type::g_disban:
+                        _id.ParseFromString(cache);
+                        is=reactor->DB.g_disban(uid,_id.id(0));
+                        _send(Type::g_disban,is);
+                        break;
 
-                case Type::g_addmanager:
-                    _id.ParseFromString(cache);
-                    is=reactor->DB.g_addmanager(uid,_id.id(0),_id.id(1));
-                    _send(Type::g_addmanager,is);
-                    break;
+                    case Type::g_request:
+                        _id.ParseFromString(cache);
+                        is=reactor->DB.g_request(uid,_id.id(0));
+                        _send(Type::g_request,is);
+                        if(is)
+                        {                
+                            auto managers=reactor->DB.g_manager(_id.id(0));
+                            for(auto&tmp:managers)
+                            {
+                                for(auto&tmp2:reactor->reactors)
+                                {
+                                    try{
+                                        tmp2->fd_map.at(uid_map.at(tmp)).clannel->
+                                        _send(Type::notify_g_req,is,{},{},{},{},uid,_id.id(0));
+                                    }catch(std::out_of_range){}
+                                }
+                            }  
+                        }
+                        break;
 
-                case Type::g_delmanager:
-                    _id.ParseFromString(cache);
-                    is=reactor->DB.g_delmanager(uid,_id.id(0),_id.id(1));
-                    _send(Type::g_delmanager,is);
-                    break;
+                    case Type::g_listreq:
+                        _id.ParseFromString(cache);
+                        tmpv = reactor->DB.g_listreq(uid,_id.id(0));
+                        if(reactor->DB.mysql_iserr())is = 0;
+                        _send(Type::g_listreq, is, tmpv);
+                        break;
 
-                case Type::g_m_history:
-                    _id.ParseFromString(cache);
-                    tmpvv = reactor->DB.g_m_history(uid,_id.id(0));
-                    if(reactor->DB.mysql_iserr())is = 0;
-                    _send(Type::g_m_history, is, tmpvv[0], tmpvv[1],tmpvv[2]);
-                    break;
+                    case Type::g_add:
+                        _id.ParseFromString(cache);
+                        is=reactor->DB.g_add(uid,_id.id(0),_id.id(1));
+                        _send(Type::g_add,is);
+                        break;
 
-                case Type::g_f_history0:
-                    _id.ParseFromString(cache);
-                    tmpvv = reactor->DB.g_f_history0(uid,_id.id(0));
-                    if(reactor->DB.mysql_iserr())is = 0;
-                    _send(Type::g_f_history0, is, tmpvv[0], tmpvv[1],tmpvv[2]);
-                    break;
+                    case Type::g_del:
+                        _id.ParseFromString(cache);
+                        is=reactor->DB.g_del(uid,_id.id(0),_id.id(1));
+                        _send(Type::g_del,is);
+                        break;
 
-                case Type::g_f_history1:
-                    _file.ParseFromString(cache);
-                    tmpvv = reactor->DB.g_f_history1(uid,_file.obj(0),_file.name(0));
-                    if(reactor->DB.mysql_iserr())is = 0;
-                    _send(Type::g_f_history1, is, tmpvv[0],tmpvv[1],tmpvv[2],tmpvv[3]);
-                    break;
+                    case Type::g_search:
+                        tmpvv = reactor->DB.g_search(uid);
+                        if(reactor->DB.mysql_iserr())is = 0;
+                        _send(Type::g_search, is, tmpvv[0], tmpvv[1]);
+                        break;
 
-                case Type::g_confirm:
-                    _id.ParseFromString(cache);
-                    is=reactor->DB.g_confirm(uid,_id.id(0));
-                    _send(Type::g_confirm,is);
-                    break;
+                    case Type::g_message:
+                        _mess.ParseFromString(cache);
+                        is=reactor->DB.g_message(uid,_mess.gid(),_mess.context(0));
+                        _send(Type::g_message,is);
+                        if(is)
+                        {                
+                            auto members=reactor->DB.g_members(_mess.gid());
+                            for(auto&tmp:members)
+                            {
+                                for(auto&tmp2:reactor->reactors)
+                                {
+                                    try{
+                                        tmp2->fd_map.at(uid_map.at(tmp)).clannel->
+                                        _send(Type::notify_g_m,is,{_mess.context(0)},{},{},{},uid,_mess.gid());
+                                    }catch(std::out_of_range){}
+                                }
+                            }  
+                        }
+                        break;
 
-                case Type::fri_confirm:
-                    _id.ParseFromString(cache);
-                    is=reactor->DB.fri_confirm(uid,_id.id(0));
-                    _send(Type::fri_confirm,is);
-                    break;
+                    case Type::g_file:
+                        _file.ParseFromString(cache);
+                        ptr.reset(new char[5000]);
+                        if (need_recv==0){
+                            rm_in_chatroom(_file.name(0),uid,_file.obj(0));
+                            need_recv=_file.len(0);
+                        }
+                        std::cerr<<"838 need_recv="<<need_recv<<std::endl;
+                        while(need_recv!=0){
+                            if(need_recv>5000){
+                                std::cerr<<"840"<<std::endl;
+                                recvd=recv(fd,ptr.get(),5000,MSG_DONTWAIT);
+                                if (recvd<5000){
+                                    ret=1;
+                                }
+                            }else{
+                                std::cerr<<"847"<<std::endl;
+                                recvd=recv(fd,ptr.get(),need_recv,MSG_DONTWAIT);
+                                if (recvd<need_recv){
+                                    ret=1;
+                                }
+                            }
+                            if(recvd>=0){
+                                std::cerr<<"855"<<std::endl;
+                                tmp=append_in_chatroom(ptr.get(),recvd,_file.name(0),_file.obj(0));
+                                if (tmp<recvd){
+                                    std::cerr<<"857"<<std::endl;
+                                    rm_in_chatroom(_file.name(0),_file.obj(0));
+                                    is=0;
+                                    break;
+                                }else{
+                                    need_recv-=tmp;
+                                }
+                            }else{
+                                std::cerr<<"865 "<<errno<<std::endl;
+                                rm_in_chatroom(_file.name(0),_file.obj(0));
+                                is=0;
+                                break;
+                            }
+                            
+                            if(ret){
+                                return;
+                            }
+                        }
 
-                case Type::heart_check:
-                    reactor->heart_beat(fd);
-                    break;
-                
-                default:
-                    quit();
-                    return;
+                        if(is){
+                            is=reactor->DB.g_file(uid,_file.obj(0),_file.len(0),_file.name(0));
+                        }
+                        _send(Type::g_file,is);
+                        if(is)
+                        {                
+                            auto members=reactor->DB.g_members(_file.obj(0));
+                            for(auto&tmp:members)
+                            {
+                                for(auto&tmp2:reactor->reactors)
+                                {
+                                    try{
+                                        tmp2->fd_map.at(uid_map.at(tmp)).clannel->
+                                        _send(Type::notify_g_f,is,{_file.name(0)},{},{},{},uid,_file.obj(0));
+                                    }catch(std::out_of_range){}
+                                }
+                            }  
+                        }
+                        break;
+
+                    case Type::g_quit:
+                        _id.ParseFromString(cache);
+                        is=reactor->DB.g_quit(uid,_id.id(0));
+                        _send(Type::g_quit,is);
+                        break;
+
+                    case Type::g_members:
+                        _id.ParseFromString(cache);
+                        tmpvv = reactor->DB.g_members(uid,_id.id(0));
+                        if(reactor->DB.mysql_iserr())is = 0;
+                        _send(Type::g_members, is, tmpvv[0], tmpvv[1]);
+                        break;
+
+                    case Type::g_addmanager:
+                        _id.ParseFromString(cache);
+                        is=reactor->DB.g_addmanager(uid,_id.id(0),_id.id(1));
+                        _send(Type::g_addmanager,is);
+                        break;
+
+                    case Type::g_delmanager:
+                        _id.ParseFromString(cache);
+                        is=reactor->DB.g_delmanager(uid,_id.id(0),_id.id(1));
+                        _send(Type::g_delmanager,is);
+                        break;
+
+                    case Type::g_m_history:
+                        _id.ParseFromString(cache);
+                        tmpvv = reactor->DB.g_m_history(uid,_id.id(0));
+                        if(reactor->DB.mysql_iserr())is = 0;
+                        _send(Type::g_m_history, is, tmpvv[0], tmpvv[1],tmpvv[2]);
+                        break;
+
+                    case Type::g_f_history0:
+                        _id.ParseFromString(cache);
+                        tmpvv = reactor->DB.g_f_history0(uid,_id.id(0));
+                        if(reactor->DB.mysql_iserr())is = 0;
+                        _send(Type::g_f_history0, is, tmpvv[0], tmpvv[1],tmpvv[2]);
+                        break;
+
+                    case Type::g_f_history1:
+                        _file.ParseFromString(cache);
+                        if(need_send==0){
+                            tmpvv = reactor->DB.g_f_history1(uid,_file.obj(0),_file.name(0));
+                            if(reactor->DB.mysql_iserr())is = 0;
+                            _send(Type::g_f_history1, is, tmpvv[0],tmpvv[1],tmpvv[2],tmpvv[3]);
+                        }
+                        
+                        sfd=open(("/var/lib/chatroom_files/g"+std::to_string(_file.obj(0))+_file.name(0)).c_str(),O_RDONLY);
+                        if(sfd>=0){
+                            std::cerr<<"start send"<<std::endl;
+                            tmp=sendfile64(fd,sfd,offset.get(),need_send);
+                            std::cerr<<"end send"<<std::endl;
+                            if(tmp>=0){
+                                need_send-=tmp;
+                                if(need_send>0){
+                                    quit();
+                                }
+                            }else{
+                                quit();
+                            }
+                            close(sfd);
+                        }
+                        break;
+
+                    case Type::g_confirm:
+                        _id.ParseFromString(cache);
+                        is=reactor->DB.g_confirm(uid,_id.id(0));
+                        _send(Type::g_confirm,is);
+                        break;
+
+                    case Type::fri_confirm:
+                        _id.ParseFromString(cache);
+                        is=reactor->DB.fri_confirm(uid,_id.id(0));
+                        _send(Type::fri_confirm,is);
+                        break;
+
+                    case Type::heart_check:
+                        reactor->heart_beat(fd);
+                        break;
+                    
+                    default:
+                        quit();
+                        return;
+                }
+            }catch(select_err){
+                std::cerr<<"select错误";
+                _send(head.type(),0);
             }
+            need_recv=0;
             reset();
         }
     }
 }
 void Clannel_checked::quit()
 {
+    if(need_recv>0){
+        chatroom::File _file;
+        _file.ParseFromString(cache);
+        if(head.type()==Type::u_file){
+            rm_in_chatroom(_file.name(0),uid,_file.obj(0));
+        }else{
+            rm_in_chatroom(_file.name(0),_file.obj(0));
+        }
+    }
     uid_ulock.lock();
     uid_map.erase(uid);
     uid_ulock.unlock();
@@ -893,36 +1074,41 @@ void Clannel_nocheck::deal()
             chatroom::Login_info login;
             chatroom::Signup_info signup;
             int tmp;
-            switch (head.type())
-            {
-                case Type::login:
-                    login.ParseFromString(cache);
-                    if(reactor->DB.login(login.uid(),login.password())==0)_send(Type::login,0);
-                    else
-                    {
-                        reactor->modfd(fd,Reactor_type::checked,login.uid());
-                        _send(Type::login,1,0,reactor->DB.search_mess(login.uid()));
-                    }
-                    break;
-                
-                case Type::signup:
-                    signup.ParseFromString(cache);
-                    if((tmp=reactor->DB.signup(signup.name(),signup.password()))==0)_send(Type::signup,0);
-                    else _send(Type::signup,1,tmp);
-                    break;
+            try{
+                switch (head.type())
+                {
+                    case Type::login:
+                        login.ParseFromString(cache);
+                        if(reactor->DB.login(login.uid(),login.password())==0)_send(Type::login,0);
+                        else
+                        {
+                            reactor->modfd(fd,Reactor_type::checked,login.uid());
+                            _send(Type::login,1,0,reactor->DB.search_mess(login.uid()));
+                        }
+                        break;
+                    
+                    case Type::signup:
+                        signup.ParseFromString(cache);
+                        if((tmp=reactor->DB.signup(signup.name(),signup.password()))==0)_send(Type::signup,0);
+                        else _send(Type::signup,1,tmp);
+                        break;
 
-                case Type::logout:
-                    login.ParseFromString(cache);
-                    _send(Type::logout,reactor->DB.logout(login.uid(),login.password()));
-                    break;
+                    case Type::logout:
+                        login.ParseFromString(cache);
+                        _send(Type::logout,reactor->DB.logout(login.uid(),login.password()));
+                        break;
 
-                case Type::heart_check:
-                    reactor->heart_beat(fd);
-                    break;
+                    case Type::heart_check:
+                        reactor->heart_beat(fd);
+                        break;
 
-                default:
-                    quit();
-                    return;
+                    default:
+                        quit();
+                        return;
+                }
+            }catch(select_err){
+                std::cerr<<"select错误";
+                _send(head.type(),0);
             }
             reset();
         }

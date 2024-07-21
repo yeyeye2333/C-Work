@@ -18,6 +18,7 @@ public:
         sigset_t sig;
         sigemptyset(&sig);
         sigaddset(&sig,SIGALRM);
+        sigaddset(&sig,SIGALRM|SIGPIPE);
         sigprocmask(SIG_BLOCK,&sig,nullptr);
     }
     void start()

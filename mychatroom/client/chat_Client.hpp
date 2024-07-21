@@ -170,8 +170,9 @@ void Client::mainUI()
                 tosend._send(Type::u_listreq);
                 if(tosend.ret())
                 {
-                    std::cout<<"输入要加好友:"<<std::flush;
+                    std::cout<<"输入要加好友ID(输入0退出):"<<std::flush;
                     std::cin>>id;
+                    if(id==0)break;
                     tosend._send(Type::u_add,id);
                 }
                 break;
@@ -202,7 +203,7 @@ void Client::mainUI()
             case '9':
                 std::cout<<"输入群ID:"<<std::flush;
                 std::cin>>id;
-                tosend._send(Type::g_add);
+                tosend._send(Type::g_request,id);
                 break;
 
             default:
@@ -344,7 +345,7 @@ void Client::groupUI()
                 {
                     std::cout<<"输入消息内容(不超过1000字):"<<std::flush;
                     std::cin>>context;
-                    tosend._send(Type::g_message,tosend.in_gid,0,context);
+                    tosend._send(Type::g_message,tosend.uid,tosend.in_gid,context);
                 }
                 break;
             
@@ -362,7 +363,7 @@ void Client::groupUI()
                         file_i.read(file_ptr.get(),size);
                         std::cout<<"确定文件名:"<<std::flush;
                         std::cin>>name;
-                        tosend._send(Type::u_file,tosend.in_uid,0,name,string(file_ptr.get(),size));
+                        tosend._send(Type::g_file,tosend.in_gid,0,name,string(file_ptr.get(),size));
                     }
                 }
                 catch(std::invalid_argument){std::cerr<<"错误:文件名无效\n";}
@@ -394,8 +395,9 @@ void Client::groupUI()
                 tosend._send(Type::g_listreq,tosend.in_gid);
                 if(tosend.ret())
                 {
-                    std::cout<<"输入拉入对象ID:"<<std::flush;
+                    std::cout<<"输入拉入对象ID(输入0退出):"<<std::flush;
                     std::cin>>id;
+                    if(id==0)break;
                     tosend._send(Type::g_add,tosend.in_gid,id);
                 }
                 break;

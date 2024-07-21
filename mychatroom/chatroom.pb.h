@@ -1745,9 +1745,9 @@ class File final :
   enum : int {
     kObjFieldNumber = 1,
     kNameFieldNumber = 2,
-    kContextFieldNumber = 3,
     kDateFieldNumber = 4,
-    kGidFieldNumber = 5,
+    kLenFieldNumber = 5,
+    kGidFieldNumber = 6,
   };
   // repeated int32 obj = 1;
   int obj_size() const;
@@ -1795,34 +1795,6 @@ class File final :
   ::google::protobuf::RepeatedPtrField<std::string>* _internal_mutable_name();
 
   public:
-  // repeated bytes context = 3;
-  int context_size() const;
-  private:
-  int _internal_context_size() const;
-
-  public:
-  void clear_context() ;
-  const std::string& context(int index) const;
-  std::string* mutable_context(int index);
-  void set_context(int index, const std::string& value);
-  void set_context(int index, std::string&& value);
-  void set_context(int index, const char* value);
-  void set_context(int index, const void* value, std::size_t size);
-  void set_context(int index, absl::string_view value);
-  std::string* add_context();
-  void add_context(const std::string& value);
-  void add_context(std::string&& value);
-  void add_context(const char* value);
-  void add_context(const void* value, std::size_t size);
-  void add_context(absl::string_view value);
-  const ::google::protobuf::RepeatedPtrField<std::string>& context() const;
-  ::google::protobuf::RepeatedPtrField<std::string>* mutable_context();
-
-  private:
-  const ::google::protobuf::RepeatedPtrField<std::string>& _internal_context() const;
-  ::google::protobuf::RepeatedPtrField<std::string>* _internal_mutable_context();
-
-  public:
   // repeated string date = 4;
   int date_size() const;
   private:
@@ -1851,7 +1823,25 @@ class File final :
   ::google::protobuf::RepeatedPtrField<std::string>* _internal_mutable_date();
 
   public:
-  // optional int32 gid = 5;
+  // repeated int64 len = 5;
+  int len_size() const;
+  private:
+  int _internal_len_size() const;
+
+  public:
+  void clear_len() ;
+  ::int64_t len(int index) const;
+  void set_len(int index, ::int64_t value);
+  void add_len(::int64_t value);
+  const ::google::protobuf::RepeatedField<::int64_t>& len() const;
+  ::google::protobuf::RepeatedField<::int64_t>* mutable_len();
+
+  private:
+  const ::google::protobuf::RepeatedField<::int64_t>& _internal_len() const;
+  ::google::protobuf::RepeatedField<::int64_t>* _internal_mutable_len();
+
+  public:
+  // optional int32 gid = 6;
   bool has_gid() const;
   void clear_gid() ;
   ::int32_t gid() const;
@@ -1890,8 +1880,9 @@ class File final :
     ::google::protobuf::RepeatedField<::int32_t> obj_;
     mutable ::google::protobuf::internal::CachedSize _obj_cached_byte_size_;
     ::google::protobuf::RepeatedPtrField<std::string> name_;
-    ::google::protobuf::RepeatedPtrField<std::string> context_;
     ::google::protobuf::RepeatedPtrField<std::string> date_;
+    ::google::protobuf::RepeatedField<::int64_t> len_;
+    mutable ::google::protobuf::internal::CachedSize _len_cached_byte_size_;
     ::int32_t gid_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
@@ -2149,107 +2140,6 @@ File::_internal_mutable_name() {
   return &_impl_.name_;
 }
 
-// repeated bytes context = 3;
-inline int File::_internal_context_size() const {
-  return _internal_context().size();
-}
-inline int File::context_size() const {
-  return _internal_context_size();
-}
-inline void File::clear_context() {
-  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
-  _impl_.context_.Clear();
-}
-inline std::string* File::add_context()
-    ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
-  std::string* _s = _internal_mutable_context()->Add();
-  // @@protoc_insertion_point(field_add_mutable:chatroom.File.context)
-  return _s;
-}
-inline const std::string& File::context(int index) const
-    ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  // @@protoc_insertion_point(field_get:chatroom.File.context)
-  return _internal_context().Get(index);
-}
-inline std::string* File::mutable_context(int index)
-    ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  // @@protoc_insertion_point(field_mutable:chatroom.File.context)
-  return _internal_mutable_context()->Mutable(index);
-}
-inline void File::set_context(int index, const std::string& value) {
-  _internal_mutable_context()->Mutable(index)->assign(value);
-  // @@protoc_insertion_point(field_set:chatroom.File.context)
-}
-inline void File::set_context(int index, std::string&& value) {
-  _internal_mutable_context()->Mutable(index)->assign(std::move(value));
-  // @@protoc_insertion_point(field_set:chatroom.File.context)
-}
-inline void File::set_context(int index, const char* value) {
-  ABSL_DCHECK(value != nullptr);
-  _internal_mutable_context()->Mutable(index)->assign(value);
-  // @@protoc_insertion_point(field_set_char:chatroom.File.context)
-}
-inline void File::set_context(int index, const void* value,
-                              std::size_t size) {
-  _internal_mutable_context()->Mutable(index)->assign(
-      reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:chatroom.File.context)
-}
-inline void File::set_context(int index, absl::string_view value) {
-  _internal_mutable_context()->Mutable(index)->assign(value.data(),
-                                                     value.size());
-  // @@protoc_insertion_point(field_set_string_piece:chatroom.File.context)
-}
-inline void File::add_context(const std::string& value) {
-  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
-  _internal_mutable_context()->Add()->assign(value);
-  // @@protoc_insertion_point(field_add:chatroom.File.context)
-}
-inline void File::add_context(std::string&& value) {
-  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
-  _internal_mutable_context()->Add(std::move(value));
-  // @@protoc_insertion_point(field_add:chatroom.File.context)
-}
-inline void File::add_context(const char* value) {
-  ABSL_DCHECK(value != nullptr);
-  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
-  _internal_mutable_context()->Add()->assign(value);
-  // @@protoc_insertion_point(field_add_char:chatroom.File.context)
-}
-inline void File::add_context(const void* value, std::size_t size) {
-  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
-  _internal_mutable_context()->Add()->assign(
-      reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_add_pointer:chatroom.File.context)
-}
-inline void File::add_context(absl::string_view value) {
-  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
-  _internal_mutable_context()->Add()->assign(value.data(), value.size());
-  // @@protoc_insertion_point(field_add_string_piece:chatroom.File.context)
-}
-inline const ::google::protobuf::RepeatedPtrField<std::string>&
-File::context() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  // @@protoc_insertion_point(field_list:chatroom.File.context)
-  return _internal_context();
-}
-inline ::google::protobuf::RepeatedPtrField<std::string>*
-File::mutable_context() ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  // @@protoc_insertion_point(field_mutable_list:chatroom.File.context)
-  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
-  return _internal_mutable_context();
-}
-inline const ::google::protobuf::RepeatedPtrField<std::string>&
-File::_internal_context() const {
-  PROTOBUF_TSAN_READ(&_impl_._tsan_detect_race);
-  return _impl_.context_;
-}
-inline ::google::protobuf::RepeatedPtrField<std::string>*
-File::_internal_mutable_context() {
-  PROTOBUF_TSAN_READ(&_impl_._tsan_detect_race);
-  return &_impl_.context_;
-}
-
 // repeated string date = 4;
 inline int File::_internal_date_size() const {
   return _internal_date().size();
@@ -2351,7 +2241,52 @@ File::_internal_mutable_date() {
   return &_impl_.date_;
 }
 
-// optional int32 gid = 5;
+// repeated int64 len = 5;
+inline int File::_internal_len_size() const {
+  return _internal_len().size();
+}
+inline int File::len_size() const {
+  return _internal_len_size();
+}
+inline void File::clear_len() {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  _impl_.len_.Clear();
+}
+inline ::int64_t File::len(int index) const {
+  // @@protoc_insertion_point(field_get:chatroom.File.len)
+  return _internal_len().Get(index);
+}
+inline void File::set_len(int index, ::int64_t value) {
+  _internal_mutable_len()->Set(index, value);
+  // @@protoc_insertion_point(field_set:chatroom.File.len)
+}
+inline void File::add_len(::int64_t value) {
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  _internal_mutable_len()->Add(value);
+  // @@protoc_insertion_point(field_add:chatroom.File.len)
+}
+inline const ::google::protobuf::RepeatedField<::int64_t>& File::len() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_list:chatroom.File.len)
+  return _internal_len();
+}
+inline ::google::protobuf::RepeatedField<::int64_t>* File::mutable_len()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable_list:chatroom.File.len)
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  return _internal_mutable_len();
+}
+inline const ::google::protobuf::RepeatedField<::int64_t>& File::_internal_len()
+    const {
+  PROTOBUF_TSAN_READ(&_impl_._tsan_detect_race);
+  return _impl_.len_;
+}
+inline ::google::protobuf::RepeatedField<::int64_t>* File::_internal_mutable_len() {
+  PROTOBUF_TSAN_READ(&_impl_._tsan_detect_race);
+  return &_impl_.len_;
+}
+
+// optional int32 gid = 6;
 inline bool File::has_gid() const {
   bool value = (_impl_._has_bits_[0] & 0x00000001u) != 0;
   return value;

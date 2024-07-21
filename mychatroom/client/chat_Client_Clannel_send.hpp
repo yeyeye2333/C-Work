@@ -73,8 +73,9 @@ void Clannel_send::_send(Type type,int id1,int id2,const string&s1,const string&
             break;
         
         case Type::u_file:
-            set_File(&sendstr,{id1},{s1},{s2});
+            set_File(&sendstr,{id1},{s1},{std::to_string(s2.size())});
             realsend(sendstr,Type::u_file);
+            send(fd,s2.c_str(),s2.size(),0);
             break;
         
         case Type::u_m_history:
@@ -127,13 +128,16 @@ void Clannel_send::_send(Type type,int id1,int id2,const string&s1,const string&
             break;
         
         case Type::g_message:
-            set_Message(&sendstr,{id1},{s1});
+            set_Message(&sendstr,{id1},{s1},id2);
+            std::cerr<<id2;
             realsend(sendstr,Type::g_message);
             break;
         
         case Type::g_file:
-            set_File(&sendstr,{id1},{s1},{s2});
+            set_File(&sendstr,{id1},{s1},{std::to_string(s2.size())});
             realsend(sendstr,Type::g_file);
+            std::cerr<<"size"<<s2.size();
+            send(fd,s2.c_str(),s2.size(),0);
             break;
         
         case Type::g_quit:
