@@ -1,7 +1,22 @@
 #include<iostream>
 #include <linux/io_uring.h>
+class A{
+public:
+    A()=default;
+    A(A&&a){
+        num=0;
+        std::swap(this->num,a.num);
+    }
+    A& operator=(A&&a){
+        num=0;
+        std::swap(this->num,a.num);
+        return *this;
+    }
+    int num;
+};
 int main()
 {
-    int a[5];
-    std::cerr<<sizeof(a)<<sizeof(*a);
+    A a;
+    A b;
+    a=std::move(b);
 }
