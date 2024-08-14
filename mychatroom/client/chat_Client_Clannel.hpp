@@ -9,6 +9,9 @@
 #include<sys/socket.h>
 #include<tuple>
 #include<fstream>
+#include<fcntl.h>
+#include<sys/sendfile.h>
+#include<sys/stat.h>
 using std::string;
 using chatroom::Type;
 #define pr printf("=========================================================================\n")
@@ -62,7 +65,7 @@ void set_File(string*s_ptr,const std::vector<int> &obj,const std::vector<string>
     chatroom::File _File;
     for(auto &tmp:obj)_File.add_obj(tmp);
     for(auto &tmp:name)_File.add_name(tmp);
-    for(auto &tmp:context)_File.add_len(std::stoi(tmp));
+    for(auto &tmp:context)_File.add_len(std::stol(tmp));
     _File.SerializePartialToString(s_ptr);
 }
 void set_Message(string*s_ptr,const std::vector<int>&obj={},const std::vector<string>&context={},int gid=0)

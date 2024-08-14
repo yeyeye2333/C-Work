@@ -25,7 +25,7 @@ void Clannel_recv::_recv()
     }
     chatroom::Head _head;
     _head.ParseFromArray(tmp,len);
-    std::cerr<<_head.DebugString();
+    // std::cerr<<_head.DebugString();
     char tmp2[_head.len()];
     if(_head.len()>0)
     {
@@ -55,7 +55,7 @@ void Clannel_recv::_recv()
             if(_head.is()==0)
             {
                 uid=0;
-                std::cerr<<"账户不存在/密码错误\n";
+                std::cerr<<"账户无法登录/密码错误\n";
             }
             else
             {
@@ -70,7 +70,7 @@ void Clannel_recv::_recv()
             else
             {
                 _signup.ParseFromArray(tmp2,_head.len());
-                std::cout<<"你的 uid="<<_signup.uid()<<std::endl;
+                std::cout<<"注册成功,你的 uid="<<_signup.uid()<<std::endl;
             }
             break;
 
@@ -93,7 +93,7 @@ void Clannel_recv::_recv()
             break;
     
         case Type::u_request:
-            if(_head.is()==0)std::cerr<<"操作失败\n";
+            if(_head.is()==0)std::cerr<<"操作失败/已申请\n";
             else std::cout<<"请求成功"<<std::endl;
             break;
         
@@ -102,10 +102,10 @@ void Clannel_recv::_recv()
             else
             {
                 _str.ParseFromArray(tmp2,_head.len());
-                std::cout<<"请求ID:\n";
-                for(int c=0;c<_str.str_size();c++)
+                std::cout<<"请求ID\t\t名字\n";
+                for(int c=0;c<_str.str_size();c+=2)
                 {
-                    std::cout<<_str.str(c)<<"\t";
+                    std::cout<<_str.str(c)<<"\t\t"<<_str.str(c+1)<<'\n';
                 }
                 std::cout<<std::endl;
             }
@@ -118,7 +118,7 @@ void Clannel_recv::_recv()
         
         case Type::u_del:
             if(_head.is()==0)std::cerr<<"操作失败\n";
-            else std::cout<<"删除成功"<<std::endl;
+            else std::cout<<"对方已不是好友"<<std::endl;
             break;
         
         case Type::u_blok:
@@ -142,7 +142,7 @@ void Clannel_recv::_recv()
             break;
         
         case Type::u_m_history:
-            if(_head.is()==0)std::cerr<<"网络不佳\n";
+            if(_head.is()==0)std::cerr<<"操作失败\n";
             else
             {
                 _mess.ParseFromArray(tmp2,_head.len());
@@ -154,7 +154,7 @@ void Clannel_recv::_recv()
             break;
         
         case Type::u_f_history0:
-            if(_head.is()==0)std::cerr<<"网络不佳\n";
+            if(_head.is()==0)std::cerr<<"操作失败\n";
             else
             {
                 _file.ParseFromArray(tmp2,_head.len());
@@ -166,27 +166,30 @@ void Clannel_recv::_recv()
             break;
         
         case Type::u_f_history1:
-            if(_head.is()==0)std::cerr<<"网络不佳\n";
+            if(_head.is()==0)std::cerr<<"操作失败\n";
             else
             {
                 _file.ParseFromArray(tmp2,_head.len());
                 std::cout<<"输入文件路径(目录):"<<std::flush;
-                std::cin>>file_path;
+                std::getline(std::cin,file_path);
                 file_path+="/"+_file.name(0);
                 try{
                     file_o.open(file_path,std::iostream::binary|std::iostream::out);
                     long need_recv=_file.len(0);
                     unique_ptr<char[]>cache;
-                    if(need_recv>10000){
-                        cache.reset(new char[10000]);
+                    long len;
+                    if(need_recv>100000){
+                        cache.reset(new char[100000]);
+                        len=100000;
                     }else{
                         cache.reset(new char[need_recv]);
+                        len=need_recv;
                     }
                     if(file_o.is_open())
                     {
                         while (need_recv>0)
-                        {
-                            long tmp=recv(fd,cache.get(),sizeof(cache.get()),MSG_DONTWAIT);
+                        { 
+                            long tmp=recv(fd,cache.get(),len,0);
                             if (tmp<0)
                             {
                                 continue;
@@ -218,19 +221,20 @@ void Clannel_recv::_recv()
             break;
         
         case Type::g_request:
-            if(_head.is()==0)std::cerr<<"网络不佳\n";
+            if(_head.is()==0)std::cerr<<"操作失败/已申请\n";
             else std::cout<<"请求成功"<<std::endl;
             break;
         
         case Type::g_listreq:
-            if(_head.is()==0)std::cerr<<"网络不佳/不是管理员\n";
+            if(_head.is()==0)std::cerr<<"操作失败/不是管理员\n";
             else
             {
                 _str.ParseFromArray(tmp2,_head.len());
-                std::cout<<"加群申请:";
-                for(int c=0;c<_str.str_size();c++)
+                std::cout<<"加群申请:\n";
+                std::cout<<"请求ID\t\t名字\n";
+                for(int c=0;c<_str.str_size();c+=2)
                 {
-                    std::cout<<_str.str(c)<<"\t";
+                    std::cout<<_str.str(c)<<"\t\t"<<_str.str(c+1)<<'\n';
                 }
                 std::cout<<std::endl;
             }
@@ -243,7 +247,7 @@ void Clannel_recv::_recv()
         
         case Type::g_del:
             if(_head.is()==0)std::cerr<<"操作失败\n";
-            else std::cout<<"删除成功"<<std::endl;
+            else std::cout<<"对方已不是群成员"<<std::endl;
             break;
         
         case Type::g_search:
@@ -251,7 +255,7 @@ void Clannel_recv::_recv()
             else
             {
                 _mess.ParseFromArray(tmp2,_head.len());
-                std::cout<<"组名\t\tID\n";
+                std::cout<<"群名\t\tID\n";
                 for(int c=0;c<_mess.obj_size();c++)
                 {
                     std::cout<<_mess.context(c)<<"\t\t"<<_mess.obj(c)<<std::endl;
@@ -279,9 +283,10 @@ void Clannel_recv::_recv()
             else
             {
                 _mess.ParseFromArray(tmp2,_head.len());
-                std::cout<<"UID\t\t是/否为管理员\n";
+                std::cout<<"名字\t\tUID\t\t是/否为管理员\n";
                 for(int c=0;c<_mess.obj_size();c++)
                 {
+                    std::cout<<_mess.date(c)<<"\t\t";
                     std::cout<<_mess.obj(c)<<"\t\t";
                     if(_mess.context(c)=="1")std::cout<<"是";
                     else std::cout<<"不是";
@@ -337,16 +342,19 @@ void Clannel_recv::_recv()
                     file_o.open(file_path,std::iostream::binary|std::iostream::out);
                     long need_recv=_file.len(0);
                     unique_ptr<char[]>cache;
-                    if(need_recv>10000){
-                        cache.reset(new char[10000]);
+                    long len;
+                    if(need_recv>100000){
+                        cache.reset(new char[100000]);
+                        len=100000;
                     }else{
                         cache.reset(new char[need_recv]);
+                        len=need_recv;
                     }
                     if(file_o.is_open())
                     {
                         while (need_recv>0)
                         {
-                            long tmp=recv(fd,cache.get(),sizeof(cache.get()),MSG_DONTWAIT);
+                            long tmp=recv(fd,cache.get(),len,MSG_DONTWAIT);
                             if (tmp<0)
                             {
                                 continue;
@@ -381,36 +389,36 @@ void Clannel_recv::_recv()
 
         case Type::notify_u_req:
             _id.ParseFromArray(tmp2,_head.len());
-            std::cout<<_Greed<<"\n\""<<_id.id(0)<<"\""<<"向你发送了好友请求"<<_Reset<<std::flush;
+            std::cout<<_Greed<<"\n\""<<_id.id(0)<<"\""<<"向你发送了好友请求"<<_Reset<<std::endl;
             break;
         
         case Type::notify_u_m:
             _mess.ParseFromArray(tmp2,_head.len());
-            if(in_uid!=_mess.obj(0))std::cout<<_Blue<<"\n\""<<_mess.obj(0)<<"\""<<"向你发送了一条消息"<<_Reset<<std::flush;
-            else std::cout<<_Blue<<"\n\""<<_mess.obj(0)<<"\":"<<_mess.context(0)<<_Reset<<std::flush;
+            if(in_uid!=_mess.obj(0))std::cout<<_Blue<<"\n\""<<_mess.obj(0)<<"\""<<"向你发送了一条消息"<<_Reset<<std::endl;
+            else std::cout<<_Blue<<"\n\""<<_mess.obj(0)<<"\":"<<_mess.context(0)<<_Reset<<std::endl;
             break;
         
         case Type::notify_u_f:
             _file.ParseFromArray(tmp2,_head.len());
-            if(in_uid!=_file.obj(0))std::cout<<_Yellow<<"\n\""<<_file.obj(0)<<"\""<<"向你发送了一个文件"<<_Reset<<std::flush;
-            else std::cout<<_Yellow<<"\n\""<<_file.obj(0)<<"\"->"<<_file.name(0)<<_Reset<<std::flush;
+            if(in_uid!=_file.obj(0))std::cout<<_Yellow<<"\n\""<<_file.obj(0)<<"\""<<"向你发送了一个文件"<<_Reset<<std::endl;
+            else std::cout<<_Yellow<<"\n\""<<_file.obj(0)<<"\"->"<<_file.name(0)<<_Reset<<std::endl;
             break;
         
         case Type::notify_g_req:
             _id.ParseFromArray(tmp2,_head.len());
-            std::cout<<_Greed<<"\n\""<<_id.id(0)<<"\""<<"向群\""<<_id.id(1)<<"\"发送了进群申请"<<_Reset<<std::flush;
+            std::cout<<_Greed<<"\n\""<<_id.id(0)<<"\""<<"向群\""<<_id.id(1)<<"\"发送了进群申请"<<_Reset<<std::endl;
             break;
         
         case Type::notify_g_m:
             _mess.ParseFromArray(tmp2,_head.len());
-            if(in_gid!=_mess.gid())std::cout<<_Blue<<"\n\""<<_mess.obj(0)<<"\""<<"在群\""<<_mess.gid()<<"\"中发送了一条消息"<<_Reset<<std::flush;
-            else std::cout<<_Blue<<"\n\""<<_mess.obj(0)<<"\":"<<_mess.context(0)<<_Reset<<std::flush;
+            if(in_gid!=_mess.gid())std::cout<<_Blue<<"\n\""<<_mess.obj(0)<<"\""<<"在群\""<<_mess.gid()<<"\"中发送了一条消息"<<_Reset<<std::endl;
+            else std::cout<<_Blue<<"\n\""<<_mess.obj(0)<<"\":"<<_mess.context(0)<<_Reset<<std::endl;
             break;
         
         case Type::notify_g_f:
             _file.ParseFromArray(tmp2,_head.len());
-            if(in_gid!=_file.gid())std::cout<<_Yellow<<"\n\""<<_file.obj(0)<<"\""<<"在群\""<<_file.gid()<<"\"中发送了一个文件"<<_Reset<<std::flush;
-            else std::cout<<_Yellow<<"\n\""<<_file.obj(0)<<"\"->"<<_file.name(0)<<_Reset<<std::flush;
+            if(in_gid!=_file.gid())std::cout<<_Yellow<<"\n\""<<_file.obj(0)<<"\""<<"在群\""<<_file.gid()<<"\"中发送了一个文件"<<_Reset<<std::endl;
+            else std::cout<<_Yellow<<"\n\""<<_file.obj(0)<<"\"->"<<_file.name(0)<<_Reset<<std::endl;
             break;
 
         default:

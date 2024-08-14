@@ -38,6 +38,9 @@ public:
     std::vector<string> getrow(int least=0)//小于least抛出错误
     {
         std::vector<string> tmp;
+        if(res.get()==nullptr){
+            return tmp;
+        }
         int num=col_num();
         MYSQL_ROW row;
         if((row=mysql_fetch_row(res.get()))!=nullptr)
@@ -74,6 +77,14 @@ public:
     {
         return !mysql_ping(&db);
     }
+    
+    void escape_sql(string & target){
+        char *to=new char[target.size()*2+1];
+        mysql_real_escape_string(&db,to,target.c_str(),target.size());
+        target=string(to);
+        delete to;
+    }
+
     mysql_res s_f_wh_or(string name,string from,string where="",string order="");
     bool i_type_val(string name,string type,string val);
     bool d(string name);

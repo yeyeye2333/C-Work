@@ -44,12 +44,14 @@ protected:
     std::unique_lock<std::mutex> ulock;
 };
 class Clannel_checked:public Clannel{
+    friend class Clannel_nocheck;
 public:
     Clannel_checked(Reactor*_reac,int _fd,uint32_t _rev,int _uid)
         :Clannel(_reac,_fd,_rev),uid(_uid),uid_ulock(mtx,std::defer_lock)
     {
         uid_ulock.lock();
-        uid_map.insert({uid,fd});
+        auto tmp=uid_map.insert({uid,fd});
+        std::cerr<<"uid插入"<<tmp.second<<std::endl;
         uid_ulock.unlock();
         offset.reset(new off_t(0));
     }
@@ -57,6 +59,7 @@ public:
     void deal();
     void _send(Type type,bool is,std::vector<string> v0={},std::vector<string> v1={},
             std::vector<string> v2={},std::vector<string> v3={},int id=0,int id2=0);
+    std::mutex mtx;
 private:
     void realsend(const string& sendstr,bool is,Type type);
     void quit();
@@ -64,9 +67,12 @@ private:
     static std::map<int,int> uid_map;
     static std::mutex uid_mtx;
     std::unique_lock<std::mutex> uid_ulock;
-    long need_recv;
-    long need_send;
+    long need_recv=0;
+    long need_send=0;
     unique_ptr<off_t> offset;
+    std::vector<std::tuple<Type ,bool ,std::vector<string> ,std::vector<string> ,
+                std::vector<string> ,std::vector<string> ,int ,int >>wait_que;
+    std::mutex que_mtx;
 };
 std::map<int,int> Clannel_checked::uid_map;
 std::mutex Clannel_checked::uid_mtx;
@@ -129,6 +135,7 @@ public:
     }
     bool reducefd(int fd)
     {
+        if(efd==-1)return 0;
         ulock.lock();
         fd_map.erase(fd);
         if(epoll_ctl(efd,EPOLL_CTL_DEL,fd,nullptr)==0)
@@ -154,11 +161,16 @@ public:
         epoll_event ev_list[maxevents];
         int ev_num;
         std::vector<std::shared_ptr<Clannel>> tmp;
+        auto start2 = std::chrono::high_resolution_clock::now();
         if((ev_num=epoll_wait(efd,ev_list,maxevents,timeout))>0)
         {
+            auto end2 = std::chrono::high_resolution_clock::now();
+            std::chrono::duration<double> duration2 = end2 - start2;
+            std::cout << "epoll_wait运行时间: " << duration2.count() << " 秒" << std::endl;
             slock.lock();
             for(int c=0;c<ev_num;c++)
             {
+                heart_beat(ev_list[c].data.fd);
                 fd_map[ev_list[c].data.fd].clannel->set_event(ev_list[c].events);
                 tmp.push_back(fd_map[ev_list[c].data.fd].clannel);
             }
@@ -169,6 +181,7 @@ public:
     int heart_check()
     {
         int res=0;
+        std::vector<int>erases;
         ulock.lock();
         for(auto&tmp:fd_map)
         {
@@ -176,22 +189,44 @@ public:
             else
             {
                 res++;
-                fd_map.erase(tmp.first);
+                erases.push_back(tmp.first);
             }
+        }
+        for(auto &tmp:erases){
+            fd_map.erase(tmp);
         }
         ulock.unlock();
         return res;
     }
+    // 现在无锁
     void heart_beat(int fd)
     {
-        ulock.lock();
+        // ulock.lock();
         try{
             fd_map.at(fd).heart=1;
         }catch(std::out_of_range){}
-        ulock.unlock();
+        // ulock.unlock();
         return ;
     }
     
+    // 开始发送大量无标签数据，不允许发送其他数据,同时关闭可读，防止心跳包导致轮巡
+    bool add_epollout(int fd){
+        if(efd==-1)return false;
+        epoll_event ev;
+        ev.data.fd=fd;
+        ev.events=EPOLLRDHUP|EPOLLOUT;
+        if(epoll_ctl(efd,EPOLL_CTL_MOD,fd,&ev)==-1)return false;
+        return true;
+    }
+    // 结束发送大量无标签数据，可允许发送其他数据
+    bool rm_epollout(int fd){
+        if(efd==-1)return false;
+        epoll_event ev;
+        ev.data.fd=fd;
+        ev.events=EPOLLIN|EPOLLRDHUP;
+        if(epoll_ctl(efd,EPOLL_CTL_MOD,fd,&ev)==-1)return false;
+        return true;
+    }
 private:
     int efd;
     int cur;
@@ -200,7 +235,7 @@ private:
     std::unique_lock<std::shared_mutex> ulock;
     std::shared_lock<std::shared_mutex> slock;
     Save DB;
-    std::vector<Reactor*> reactors;
+    std::vector<Reactor*> reactors;// send可能竞争，待改（给realsend加锁） 客户端接受文件可能收到混杂消息，待改（存realsend要发的消息）
     int reac_num=0;
 };
 
@@ -246,8 +281,7 @@ bool Clannel::recv_cache()
             cache.assign(tmp,tmp_len);
             return 1;
         }
-    }else if((head.len()-cache.size())>0)
-    {
+    }else if((head.len()-cache.size())>0){
         char tmp[head.len()-cache.size()];
         int tmp_len;
         if((tmp_len=recv(fd,tmp,head.len()-cache.size(),MSG_DONTWAIT))<(head.len()-cache.size()))
@@ -286,7 +320,7 @@ void set_File(string*s_ptr,const std::vector<int> &obj={},const std::vector<stri
     chatroom::File _File;
     for(auto &tmp:obj)_File.add_obj(tmp);
     for(auto &tmp:name)_File.add_name(tmp);
-    for(auto &tmp:context)_File.add_len(std::stoi(tmp));
+    for(auto &tmp:context)_File.add_len(std::stol(tmp));
     for(auto &tmp:date)_File.add_date(tmp);
     if(gid!=0)_File.set_gid(gid);
     _File.SerializePartialToString(s_ptr);
@@ -375,16 +409,30 @@ void  Clannel_checked::realsend(const string&sendstr,bool is,Type type)
     if(is==0)std::cerr<<"mysql_err:"<<reactor->DB.mysql_err()<<"\n";
     set_Head(&sendhead,is,type,sendstr.size());
     char len=sendhead.size();
-    uid_ulock.lock();
     send(fd,(string(&len,sizeof(len))+sendhead).c_str(),sizeof(len)+len,0);
     if(sendstr.size()>0)send(fd,sendstr.c_str(),sendstr.size(),0);
-    uid_ulock.unlock();
 }
 void Clannel_checked::_send(Type type,bool is,std::vector<string> v0,std::vector<string> v1,
                         std::vector<string> v2,std::vector<string> v3,int id,int id2)
 {
     std::vector<int> tmp;
     string sendstr;
+    std::unique_lock<std::mutex> tmp_lock(mtx,std::defer_lock);
+    if(type==Type::u_f_history1||type==Type::g_f_history1){
+        // 需外部锁定
+    }else if(type==Type::notify_g_f||type==Type::notify_g_m||type==Type::notify_g_req||
+        type==Type::notify_u_f||type==Type::notify_u_m||type==Type::notify_u_req){
+        que_mtx.lock();
+        if(!tmp_lock.try_lock()){
+            // 已锁定，添加至缓冲区中等待发送
+            wait_que.push_back( std::make_tuple(type, is ,v0, v1, v2, v3, id, id2));
+            que_mtx.unlock();
+            return;
+        }
+        que_mtx.unlock();
+    }else{
+        tmp_lock.lock();
+    }
     switch (type)
     {
         case Type::u_search:
@@ -490,7 +538,7 @@ void Clannel_checked::_send(Type type,bool is,std::vector<string> v0,std::vector
 
         case Type::g_members:
             for(auto &tmp2:v0)tmp.push_back(std::stoi(tmp2));
-            set_Message(&sendstr,tmp,v1);
+            set_Message(&sendstr,tmp,v1,v2);
             realsend(sendstr, is, Type::g_members);
             break;
 
@@ -561,6 +609,20 @@ void Clannel_checked::_send(Type type,bool is,std::vector<string> v0,std::vector
         default:
             break;
     }
+    if(type!=Type::u_f_history1&&type!=Type::g_f_history1){
+        tmp_lock.unlock();
+        std::unique_lock<std::mutex> que_lock(que_mtx);
+        std::vector<std::tuple<Type ,bool ,std::vector<string> ,std::vector<string> ,
+                std::vector<string> ,std::vector<string> ,int ,int >>exec_que;
+        for(auto &tmp:wait_que){
+            exec_que.push_back(tmp);
+        }
+        wait_que.clear();
+        que_lock.unlock();
+        for(auto &tmp:exec_que){
+            _send(std::get<0>(tmp),std::get<1>(tmp),std::get<2>(tmp),std::get<3>(tmp),std::get<4>(tmp),std::get<5>(tmp),std::get<6>(tmp),std::get<7>(tmp));
+        }
+    }
 }
 void Clannel_checked::deal()
 {
@@ -569,7 +631,7 @@ void Clannel_checked::deal()
         quit();
         return;
     }
-    else if(revent&EPOLLIN)
+    else if(revent&EPOLLIN||revent&EPOLLOUT)
     {
         if(recv_cache()==0)return;
         else
@@ -606,18 +668,28 @@ void Clannel_checked::deal()
                         {
                             for(auto&tmp:reactor->reactors)
                             {
+                                tmp->slock.lock();
                                 try{
                                     tmp->fd_map.at(uid_map.at(_id.id(0))).clannel->
                                     _send(Type::notify_u_req,is,{},{},{},{},uid);
                                 }catch(std::out_of_range){}
+                                tmp->slock.unlock();
                             }
                         }
                         break;
 
                     case Type::u_listreq:
-                        tmpv = reactor->DB.u_listreq(uid);
-                        if(reactor->DB.mysql_iserr())is = 0;
-                        _send(Type::u_listreq, is, tmpv);
+                        tmpvv = reactor->DB.u_listreq(uid);
+                        if(reactor->DB.mysql_iserr()){
+                            is = 0;
+                            _send(Type::u_listreq, is, tmpv);
+                        }else{
+                            for(int c=0;c<tmpvv[0].size();c++){
+                                tmpv.push_back(tmpvv[0][c]);
+                                tmpv.push_back(tmpvv[1][c]);
+                            }
+                            _send(Type::u_listreq, is, tmpv);
+                        }
                         break;
 
                     case Type::u_add:
@@ -652,25 +724,28 @@ void Clannel_checked::deal()
                         {
                             for(auto&tmp:reactor->reactors)
                             {
+                                tmp->slock.lock();
                                 try{
                                     tmp->fd_map.at(uid_map.at(_mess.obj(0))).clannel->
                                     _send(Type::notify_u_m,is,{_mess.context(0)},{},{},{},uid);
                                 }catch(std::out_of_range){}
+                                tmp->slock.unlock();
                             }
                         }
                         break;
 
                     case Type::u_file:
                         _file.ParseFromString(cache);
-                        ptr.reset(new char[5000]);
+                        reactor->DB.is_fri(uid,_file.obj(0));
+                        ptr.reset(new char[40960]);
                         if (need_recv==0){
                             rm_in_chatroom(_file.name(0),uid,_file.obj(0));
                             need_recv=_file.len(0);
                         }
                         while(need_recv!=0){
-                            if(need_recv>5000){
-                                recvd=recv(fd,ptr.get(),5000,MSG_DONTWAIT);
-                                if (recvd<5000){
+                            if(need_recv>40960){
+                                recvd=recv(fd,ptr.get(),40960,MSG_DONTWAIT);
+                                if (recvd<40960){
                                     ret=1;
                                 }
                             }else{
@@ -682,6 +757,7 @@ void Clannel_checked::deal()
                             if(recvd>0){
                                 tmp=append_in_chatroom(ptr.get(),recvd,_file.name(0),uid,_file.obj(0));
                                 if (tmp<recvd){
+                                    std::cerr<<"文件append错误\n";
                                     rm_in_chatroom(_file.name(0),uid,_file.obj(0));
                                     is=0;
                                     break;
@@ -707,10 +783,15 @@ void Clannel_checked::deal()
                         {
                             for(auto&tmp:reactor->reactors)
                             {
+                                tmp->slock.lock();
                                 try{
                                     tmp->fd_map.at(uid_map.at(_file.obj(0))).clannel->
-                                    _send(Type::notify_u_f,is,{_file.name(0)},{},{},{},uid);                                    }catch(std::out_of_range){}
-                                }
+                                    _send(Type::notify_u_f,is,{_file.name(0)},{},{},{},uid);                                    
+                                }catch(std::out_of_range){}
+                                tmp->slock.unlock();
+                            }
+                        }else{
+                            rm_in_chatroom(_file.name(0),uid,_file.obj(0));
                         }
                         break;
 
@@ -732,9 +813,19 @@ void Clannel_checked::deal()
                         _file.ParseFromString(cache);
                         if(need_send==0){
                             tmpvv = reactor->DB.u_f_history1(uid,_file.obj(0),_file.name(0));
-                            if(reactor->DB.mysql_iserr())is = 0;
+                            if(reactor->DB.mysql_iserr()||tmpvv[0].size()==0)is = 0;
                             _send(Type::u_f_history1, is, tmpvv[0],tmpvv[1],tmpvv[2],tmpvv[3]);
-                        
+                            if(is){
+                                int fl_flags=fcntl(fd,F_GETFL);
+                                if(fl_flags==-1)std::cerr<<"flags错误";
+                                fl_flags|=O_NONBLOCK;
+                                if(fcntl(fd,F_SETFL,fl_flags)<0)std::cerr<<"非阻塞设置错误";
+                                need_send=std::stol(tmpvv[2][0]);
+                                reactor->add_epollout(fd);
+                                mtx.lock();
+                            }else{
+                                break;
+                            }
                         }
 
                         sfd=open(("/var/lib/chatroom_files/u"+std::to_string(uid)+std::to_string(_file.obj(0))+_file.name(0)).c_str(),O_RDONLY);
@@ -743,15 +834,51 @@ void Clannel_checked::deal()
                         }
                         if(sfd>=0){
                             tmp=sendfile64(fd,sfd,offset.get(),need_send);
-                            if(tmp>=0){
+                            if(tmp>=0||errno==EAGAIN){
+                                std::cerr<<"一次发了"<<tmp<<"\n";
                                 need_send-=tmp;
                                 if(need_send>0){
+                                    close(sfd);
+                                    return;
+                                }else if(need_send==0){// 结束
+                                    std::cerr<<"发完\n";
+                                    int fl_flags=fcntl(fd,F_GETFL);
+                                    if(fl_flags==-1)std::cerr<<"结束时flags错误";
+                                    fl_flags&=~O_NONBLOCK;
+                                    if(fcntl(fd,F_SETFL,fl_flags)<0)std::cerr<<"阻塞设置错误";
+                                    reactor->rm_epollout(fd);
+                                    close(sfd);
+                                    mtx.unlock();
+                                    std::unique_lock<std::mutex> que_lock(que_mtx);
+                                    std::vector<std::tuple<Type ,bool ,std::vector<string> ,std::vector<string> ,
+                                            std::vector<string> ,std::vector<string> ,int ,int >>exec_que;
+                                    for(auto &tmp:wait_que){
+                                        exec_que.push_back(tmp);
+                                    }
+                                    wait_que.clear();
+                                    que_lock.unlock();
+                                    for(auto &tmp:exec_que){
+                                        _send(std::get<0>(tmp),std::get<1>(tmp),std::get<2>(tmp),std::get<3>(tmp),
+                                            std::get<4>(tmp),std::get<5>(tmp),std::get<6>(tmp),std::get<7>(tmp));
+                                    }
+                                    break ;
+                                }else{
+                                    mtx.unlock();
+                                    close(sfd);
                                     quit();
+                                    std::cerr<<"need_send<0\n";
+                                    break;
                                 }
                             }else{
+                                std::cerr<<errno<<"sendfile返回负值且不是EAGIN\n";
+                                mtx.unlock();
+                                close(sfd);
                                 quit();
                             }
-                            close(sfd);
+                        }else{
+                            std::cerr<<"文件打开失败\n";
+                            mtx.unlock();
+                            quit();
                         }
                         break;
 
@@ -759,7 +886,9 @@ void Clannel_checked::deal()
                         _group.ParseFromString(cache);
                         tmpi = reactor->DB.g_create(uid,_group.name());
                         if(tmpi== 0)_send(Type::g_create,0);
-                        _send(Type::g_create,1,{},{},{},{},tmpi);
+                        else{
+                            _send(Type::g_create,1,{},{},{},{},tmpi);
+                        }
                         break;
 
                     case Type::g_disban:
@@ -779,10 +908,12 @@ void Clannel_checked::deal()
                             {
                                 for(auto&tmp2:reactor->reactors)
                                 {
+                                    tmp2->slock.lock();
                                     try{
                                         tmp2->fd_map.at(uid_map.at(tmp)).clannel->
                                         _send(Type::notify_g_req,is,{},{},{},{},uid,_id.id(0));
                                     }catch(std::out_of_range){}
+                                    tmp2->slock.unlock();
                                 }
                             }  
                         }
@@ -790,9 +921,17 @@ void Clannel_checked::deal()
 
                     case Type::g_listreq:
                         _id.ParseFromString(cache);
-                        tmpv = reactor->DB.g_listreq(uid,_id.id(0));
-                        if(reactor->DB.mysql_iserr())is = 0;
-                        _send(Type::g_listreq, is, tmpv);
+                        tmpvv = reactor->DB.g_listreq(uid,_id.id(0));
+                        if(reactor->DB.mysql_iserr()){
+                            is = 0;
+                            _send(Type::g_listreq, is, tmpv);
+                        }else{
+                            for(int c=0;c<tmpvv[0].size();c++){
+                                tmpv.push_back(tmpvv[0][c]);
+                                tmpv.push_back(tmpvv[1][c]);
+                            }
+                            _send(Type::g_listreq, is, tmpv);
+                        }
                         break;
 
                     case Type::g_add:
@@ -803,8 +942,12 @@ void Clannel_checked::deal()
 
                     case Type::g_del:
                         _id.ParseFromString(cache);
-                        is=reactor->DB.g_del(uid,_id.id(0),_id.id(1));
-                        _send(Type::g_del,is);
+                        if(uid==_id.id(1)){
+                            _send(Type::g_del,0);
+                        }else{
+                            is=reactor->DB.g_del(uid,_id.id(0),_id.id(1));
+                            _send(Type::g_del,is);
+                        }
                         break;
 
                     case Type::g_search:
@@ -824,42 +967,41 @@ void Clannel_checked::deal()
                             {
                                 for(auto&tmp2:reactor->reactors)
                                 {
+                                    tmp2->slock.lock();
                                     try{
                                         tmp2->fd_map.at(uid_map.at(tmp)).clannel->
                                         _send(Type::notify_g_m,is,{_mess.context(0)},{},{},{},uid,_mess.gid());
                                     }catch(std::out_of_range){}
+                                    tmp2->slock.unlock();
                                 }
-                            }  
+                            }
                         }
                         break;
 
                     case Type::g_file:
                         _file.ParseFromString(cache);
-                        ptr.reset(new char[5000]);
+                        reactor->DB.is_gmember(uid,_file.obj(0));
+                        ptr.reset(new char[40960]);
                         if (need_recv==0){
                             rm_in_chatroom(_file.name(0),uid,_file.obj(0));
                             need_recv=_file.len(0);
                         }
-                        std::cerr<<"838 need_recv="<<need_recv<<std::endl;
                         while(need_recv!=0){
-                            if(need_recv>5000){
-                                std::cerr<<"840"<<std::endl;
-                                recvd=recv(fd,ptr.get(),5000,MSG_DONTWAIT);
-                                if (recvd<5000){
+                            if(need_recv>40960){
+                                recvd=recv(fd,ptr.get(),40960,MSG_DONTWAIT);
+                                if (recvd<40960){
                                     ret=1;
                                 }
                             }else{
-                                std::cerr<<"847"<<std::endl;
                                 recvd=recv(fd,ptr.get(),need_recv,MSG_DONTWAIT);
                                 if (recvd<need_recv){
                                     ret=1;
                                 }
                             }
-                            if(recvd>=0){
-                                std::cerr<<"855"<<std::endl;
+                            if(recvd>0){
                                 tmp=append_in_chatroom(ptr.get(),recvd,_file.name(0),_file.obj(0));
                                 if (tmp<recvd){
-                                    std::cerr<<"857"<<std::endl;
+                                    std::cerr<<"文件append错误\n";
                                     rm_in_chatroom(_file.name(0),_file.obj(0));
                                     is=0;
                                     break;
@@ -867,7 +1009,6 @@ void Clannel_checked::deal()
                                     need_recv-=tmp;
                                 }
                             }else{
-                                std::cerr<<"865 "<<errno<<std::endl;
                                 rm_in_chatroom(_file.name(0),_file.obj(0));
                                 is=0;
                                 break;
@@ -889,12 +1030,16 @@ void Clannel_checked::deal()
                             {
                                 for(auto&tmp2:reactor->reactors)
                                 {
+                                    tmp2->slock.lock();
                                     try{
                                         tmp2->fd_map.at(uid_map.at(tmp)).clannel->
                                         _send(Type::notify_g_f,is,{_file.name(0)},{},{},{},uid,_file.obj(0));
                                     }catch(std::out_of_range){}
+                                    tmp2->slock.unlock();
                                 }
                             }  
+                        }else{
+                            rm_in_chatroom(_file.name(0),_file.obj(0));
                         }
                         break;
 
@@ -908,7 +1053,7 @@ void Clannel_checked::deal()
                         _id.ParseFromString(cache);
                         tmpvv = reactor->DB.g_members(uid,_id.id(0));
                         if(reactor->DB.mysql_iserr())is = 0;
-                        _send(Type::g_members, is, tmpvv[0], tmpvv[1]);
+                        _send(Type::g_members, is, tmpvv[0], tmpvv[1],tmpvv[2]);
                         break;
 
                     case Type::g_addmanager:
@@ -941,24 +1086,69 @@ void Clannel_checked::deal()
                         _file.ParseFromString(cache);
                         if(need_send==0){
                             tmpvv = reactor->DB.g_f_history1(uid,_file.obj(0),_file.name(0));
-                            if(reactor->DB.mysql_iserr())is = 0;
+                            if(reactor->DB.mysql_iserr()||tmpvv[0].size()==0)is = 0;
                             _send(Type::g_f_history1, is, tmpvv[0],tmpvv[1],tmpvv[2],tmpvv[3]);
+                            if(is){
+                                int fl_flags=fcntl(fd,F_GETFL);
+                                if(fl_flags==-1)std::cerr<<"flags错误";
+                                fl_flags|=O_NONBLOCK;
+                                if(fcntl(fd,F_SETFL,fl_flags)<0)std::cerr<<"非阻塞设置错误";
+                                need_send=std::stol(tmpvv[2][0]);
+                                reactor->add_epollout(fd);
+                                mtx.lock();
+                            }else{
+                                break;
+                            }
                         }
                         
                         sfd=open(("/var/lib/chatroom_files/g"+std::to_string(_file.obj(0))+_file.name(0)).c_str(),O_RDONLY);
                         if(sfd>=0){
-                            std::cerr<<"start send"<<std::endl;
                             tmp=sendfile64(fd,sfd,offset.get(),need_send);
-                            std::cerr<<"end send"<<std::endl;
-                            if(tmp>=0){
+                            if(tmp>=0||errno==EAGAIN){
+                                std::cerr<<"一次发了"<<tmp<<"\n";
                                 need_send-=tmp;
                                 if(need_send>0){
+                                    close(sfd);
+                                    return;
+                                }else if(need_send==0){// 结束
+                                    std::cerr<<"发完\n";
+                                    int fl_flags=fcntl(fd,F_GETFL);
+                                    if(fl_flags==-1)std::cerr<<"结束时flags错误";
+                                    fl_flags&=~O_NONBLOCK;
+                                    if(fcntl(fd,F_SETFL,fl_flags)<0)std::cerr<<"阻塞设置错误";
+                                    reactor->rm_epollout(fd);
+                                    close(sfd);
+                                    mtx.unlock();
+                                    std::unique_lock<std::mutex> que_lock(que_mtx);
+                                    std::vector<std::tuple<Type ,bool ,std::vector<string> ,std::vector<string> ,
+                                            std::vector<string> ,std::vector<string> ,int ,int >>exec_que;
+                                    for(auto &tmp:wait_que){
+                                        exec_que.push_back(tmp);
+                                    }
+                                    wait_que.clear();
+                                    que_lock.unlock();
+                                    for(auto &tmp:exec_que){
+                                        _send(std::get<0>(tmp),std::get<1>(tmp),std::get<2>(tmp),std::get<3>(tmp),
+                                            std::get<4>(tmp),std::get<5>(tmp),std::get<6>(tmp),std::get<7>(tmp));
+                                    }
+                                    break ;
+                                }else{
+                                    mtx.unlock();
+                                    close(sfd);
                                     quit();
+                                    std::cerr<<"need_send<0\n";
+                                    break;
                                 }
                             }else{
+                                std::cerr<<errno<<"sendfile返回负值且不是EAGIN\n";
+                                mtx.unlock();
+                                close(sfd);
                                 quit();
                             }
-                            close(sfd);
+                        }else{
+                            std::cerr<<"文件打开失败\n";
+                            mtx.unlock();
+                            quit();
                         }
                         break;
 
@@ -975,7 +1165,6 @@ void Clannel_checked::deal()
                         break;
 
                     case Type::heart_check:
-                        reactor->heart_beat(fd);
                         break;
                     
                     default:
@@ -987,6 +1176,8 @@ void Clannel_checked::deal()
                 _send(head.type(),0);
             }
             need_recv=0;
+            need_send=0;
+            *offset=0;
             reset();
         }
     }
@@ -1047,7 +1238,7 @@ void Clannel_nocheck::_send(Type type,bool is,int id,std::vector<string> v)
         }
         string _signup;
         set_Signup_info(&_signup,id);
-        set_Head(&_head,is,Type::login,_signup.size());
+        set_Head(&_head,is,Type::signup,_signup.size());
         len=_head.size();
         send(fd,(string(&len,sizeof(len))+_head).c_str(),len+sizeof(len),0);
         send(fd,_signup.c_str(),_signup.size(),0);
@@ -1079,7 +1270,8 @@ void Clannel_nocheck::deal()
                 {
                     case Type::login:
                         login.ParseFromString(cache);
-                        if(reactor->DB.login(login.uid(),login.password())==0)_send(Type::login,0);
+                        if((Clannel_checked::uid_map.find(login.uid())!=Clannel_checked::uid_map.cend())||
+                            (reactor->DB.login(login.uid(),login.password())==0))_send(Type::login,0);
                         else
                         {
                             reactor->modfd(fd,Reactor_type::checked,login.uid());
@@ -1099,7 +1291,6 @@ void Clannel_nocheck::deal()
                         break;
 
                     case Type::heart_check:
-                        reactor->heart_beat(fd);
                         break;
 
                     default:

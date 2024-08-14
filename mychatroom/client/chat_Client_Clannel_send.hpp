@@ -8,6 +8,7 @@ public:
     template<typename ...T>
     void _send(Type,int id1=0,int id2=0,const string&s1="",const string&s2="");
     ~Clannel_send(){}
+    std::mutex mtx;
 private:
     void realsend(const string& sendstr,Type type);
 };
@@ -16,6 +17,11 @@ void Clannel_send::_send(Type type,int id1,int id2,const string&s1,const string&
 {
     send_continue=0;
     string sendstr;
+    int in_fd;
+    ssize_t sent=0;
+    ssize_t send_ret;
+    std::unique_ptr<loff_t> u_ptr;
+    std::unique_lock<std::mutex> tmp_lock(mtx);
     switch (type)
     {
         case Type::login:
@@ -73,9 +79,25 @@ void Clannel_send::_send(Type type,int id1,int id2,const string&s1,const string&
             break;
         
         case Type::u_file:
-            set_File(&sendstr,{id1},{s1},{std::to_string(s2.size())});
+            if((in_fd=open(s2.c_str(),O_RDONLY))<0){
+                std::cerr<<"文件无法打开\n";
+                return ;
+            }
+            set_File(&sendstr,{id1},{s1},{std::to_string(lseek64(in_fd,0,SEEK_END))});
             realsend(sendstr,Type::u_file);
-            send(fd,s2.c_str(),s2.size(),0);
+            u_ptr.reset(new loff_t(0));
+            while(true){
+                send_ret=sendfile64(fd,in_fd,u_ptr.get(),lseek64(in_fd,0,SEEK_END)-sent);
+                if(send_ret<0){
+                    std::cerr<<"文件发送失败\n";
+                    break;
+                }else{
+                    sent+=send_ret;
+                }
+                if((std::filesystem::file_size(s2)-sent)==0){
+                    break;
+                }
+            }
             break;
         
         case Type::u_m_history:
@@ -134,10 +156,25 @@ void Clannel_send::_send(Type type,int id1,int id2,const string&s1,const string&
             break;
         
         case Type::g_file:
-            set_File(&sendstr,{id1},{s1},{std::to_string(s2.size())});
+            if((in_fd=open(s2.c_str(),O_RDONLY))<0){
+                std::cerr<<"文件无法打开\n";
+                return ;
+            }
+            set_File(&sendstr,{id1},{s1},{std::to_string(std::filesystem::file_size(s2))});
             realsend(sendstr,Type::g_file);
-            std::cerr<<"size"<<s2.size();
-            send(fd,s2.c_str(),s2.size(),0);
+            u_ptr.reset(new loff_t(0));
+            while(true){
+                send_ret=sendfile64(fd,in_fd,u_ptr.get(),std::filesystem::file_size(s2)-sent);
+                if(send_ret<0){
+                    std::cerr<<"文件发送失败\n";
+                    break;
+                }else{
+                    sent+=send_ret;
+                }
+                if((std::filesystem::file_size(s2)-sent)==0){
+                    break;
+                }
+            }
             break;
         
         case Type::g_quit:
