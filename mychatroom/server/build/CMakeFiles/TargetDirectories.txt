@@ -1,3 +1,0 @@
-/home/yy/C-Work/mychatroom/server/build/CMakeFiles/chatserver.dir
-/home/yy/C-Work/mychatroom/server/build/CMakeFiles/edit_cache.dir
-/home/yy/C-Work/mychatroom/server/build/CMakeFiles/rebuild_cache.dir

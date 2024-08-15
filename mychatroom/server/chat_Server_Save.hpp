@@ -2,7 +2,7 @@
 #define chat_Server_Save
 
 #include"chat_Server_Save_mysql.hpp"
-#include"chat_Server_Save_redis.hpp"
+// #include"chat_Server_Save_redis.hpp"
 #include<vector>
 #include<string>
 #include<mutex>
@@ -823,7 +823,7 @@ private:
     }
 private:
     mysql_table save_mysql;
-    redis_text save_redis;
+    // redis_text save_redis;
     static std::mutex mtx;
     std::unique_lock<std::mutex> ulock;
 };

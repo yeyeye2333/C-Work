@@ -1,12 +1,13 @@
 #ifndef chat_Server_Save_mysql
 #define chat_Server_Save_mysql
 
-#include<mysql/mysql.h>
-#include<hiredis/hiredis.h>
+#include</usr/include/mysql/mysql.h>
+// #include<hiredis/hiredis.h>
 #include<mutex>
 #include<string>
 #include<memory>
 #include<vector>
+#include<iostream>
 
 using std::string;
 using std::unique_ptr;
