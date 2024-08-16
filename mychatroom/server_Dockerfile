@@ -12,12 +12,3 @@
 # # RUN cd /Server/server/build&&cmake ..&&cmake --build .
 
 # CMD bash
-FROM archlinux
-
-RUN pacman -Syu||true
-RUN pacman -S grpc cmake gcc make pkgconfig --noconfirm
-COPY . /Client
-RUN mkdir /Server/server/build
-RUN cd /Client/client/build&&cmake ..&&cmake --build .
-
-CMD /Client/client/build/chatclient
