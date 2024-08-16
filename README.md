@@ -1,4 +1,5 @@
 # chatroom
+    (环境:arch)
     构建: cd C-Work/mychatroom  
          protoc -I=. --cpp_out=. ./chatroom.proto  
          cd client&&mkdir build&&cd build  
