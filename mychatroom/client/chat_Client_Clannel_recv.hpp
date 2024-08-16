@@ -29,10 +29,17 @@ void Clannel_recv::_recv()
     char tmp2[_head.len()];
     if(_head.len()>0)
     {
-        if(recv(fd,tmp2,_head.len(),0)<_head.len())
+        int recvd=0;
+        int tmp;
+        while(true)
         {
-            std::cerr<<"与服务器断开连接3";
-            exit(EXIT_FAILURE);
+            tmp=recv(fd,tmp2+recvd,_head.len(),0);
+            if(tmp<0){
+                std::cerr<<"与服务器断开连接3";
+                exit(EXIT_FAILURE);
+            }
+            recvd+=tmp;
+            if(recvd==_head.len())break;
         }
     }
     chatroom::File _file;

@@ -626,6 +626,7 @@ void Clannel_checked::_send(Type type,bool is,std::vector<string> v0,std::vector
 }
 void Clannel_checked::deal()
 {
+    std::cerr<<"处理fd"<<fd<<std::endl;
     if(revent&EPOLLRDHUP)
     {
         std::cerr<<"因为断开";
@@ -644,7 +645,7 @@ void Clannel_checked::deal()
             chatroom::Strs _str;
             std::vector<std::vector<string>> tmpvv;
             std::vector<string> tmpv;
-            // std::cerr<<head.DebugString();
+            std::cerr<<head.DebugString();
             int tmpi;
             bool is=1;
             long recvd;
