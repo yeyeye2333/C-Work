@@ -35,6 +35,7 @@ void Clannel_recv::_recv()
         {
             tmp=recv(fd,tmp2+recvd,_head.len(),0);
             if(tmp<0){
+                std::cerr<<errno<<"错误码";
                 std::cerr<<"与服务器断开连接3";
                 exit(EXIT_FAILURE);
             }
