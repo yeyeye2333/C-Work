@@ -1,9 +1,9 @@
-chatroom:   
-  构建: cd C-Work/mychatroom
-       protoc -I=. --cpp_out=. ./chatroom.proto
-       cd client&&mkdir build&&cd build
-       cmake ..&&cmake --build .
-  运行: ./chatclient
+# chatroom
+  构建: cd C-Work/mychatroom  
+       protoc -I=. --cpp_out=. ./chatroom.proto  
+       cd client&&mkdir build&&cd build  
+       cmake ..&&cmake --build .  
+  运行: ./chatclient  
 
 或----------------------------------------------------------------------------
 
