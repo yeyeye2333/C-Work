@@ -152,7 +152,6 @@ void Clannel_send::_send(Type type,int id1,int id2,const string&s1,const string&
         
         case Type::g_message:
             set_Message(&sendstr,{id1},{s1},id2);
-            std::cerr<<id2;
             realsend(sendstr,Type::g_message);
             break;
         

@@ -14,13 +14,13 @@ void Clannel_recv::_recv()
     char len;
     if(recv(fd,&len,sizeof(len),0)<sizeof(len))
     {
-        std::cerr<<"与服务器断开连接";
+        std::cerr<<"与服务器断开连接1";
         exit(EXIT_FAILURE);
     }
     char tmp[len];
     if(recv(fd,tmp,len,0)<len)
     {
-        std::cerr<<"与服务器断开连接";
+        std::cerr<<"与服务器断开连接2";
         exit(EXIT_FAILURE);
     }
     chatroom::Head _head;
@@ -31,7 +31,7 @@ void Clannel_recv::_recv()
     {
         if(recv(fd,tmp2,_head.len(),0)<_head.len())
         {
-            std::cerr<<"与服务器断开连接";
+            std::cerr<<"与服务器断开连接3";
             exit(EXIT_FAILURE);
         }
     }

@@ -1254,6 +1254,7 @@ void Clannel_nocheck::_send(Type type,bool is,int id,std::vector<string> v)
 }
 void Clannel_nocheck::deal()
 {
+    std::cerr<<"处理fd"<<fd;
     if(revent&EPOLLRDHUP)
     {
         std::cerr<<"因为对端关闭";
