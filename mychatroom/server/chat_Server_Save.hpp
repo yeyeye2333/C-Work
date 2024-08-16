@@ -192,17 +192,17 @@ public:
     {
         std::vector<string> res1;
         std::vector<string> res2;
-        auto tmp=select_u_request(std::to_string(uid));
+        {auto tmp=select_u_request(std::to_string(uid));
         for(auto tmp2=tmp.getrow();tmp2.size()!=0;tmp2=tmp.getrow())
         {
             res1.push_back(tmp2[0]);
-        }
-        tmp=select_u_info(res1);
+        }}
+        {auto tmp=select_u_info(res1);
         res1.clear();
         for(auto tmp2=tmp.getrow();tmp2.size()!=0;tmp2=tmp.getrow()){
             res1.push_back(tmp2[0]);
             res2.push_back(tmp2[1]);
-        }
+        }}
         return {res1,res2};
     }
     bool u_del(int uid,int fri_uid)
@@ -385,17 +385,17 @@ public:
         std::vector<string> res1;
         std::vector<string> res2;
         if(std::stoi(select_g_memebers_gid(std::to_string(gid),std::to_string(manager)).getrow(3)[2])==0)return {res1,res2};
-        auto tmp=select_g_request(std::to_string(gid));
+        {auto tmp=select_g_request(std::to_string(gid));
         for(auto tmp2=tmp.getrow();tmp2.size()!=0;tmp2=tmp.getrow())
         {
             res1.push_back(tmp2[0]);
-        }
-        tmp= select_u_info(res1);
+        }}
+        {auto tmp= select_u_info(res1);
         res1.clear();
         for(auto tmp2=tmp.getrow();tmp2.size()!=0;tmp2=tmp.getrow()){
             res1.push_back(tmp2[0]);
             res2.push_back(tmp2[1]);
-        }
+        }}
         return {res1,res2};
     }
     std::vector<std::vector<string>> g_search(int uid)

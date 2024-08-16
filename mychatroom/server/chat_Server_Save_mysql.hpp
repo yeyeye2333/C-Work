@@ -20,6 +20,7 @@ enum {se,in,de,up,cr,dr};
 class mysql_res{
 public:
     mysql_res(MYSQL_RES*input):res(input,mysql_free_result){}
+    
     int col_num()
     {
         if(res==nullptr)return 0;
@@ -57,6 +58,9 @@ public:
         }
         return std::move(tmp);
     }
+    void release(){
+        res.reset();
+    }
 private:
     unique_ptr<MYSQL_RES,void(*)(MYSQL_RES*)> res;
 };
@@ -79,6 +83,9 @@ public:
         return !mysql_ping(&db);
     }
     
+    int next_res(){
+        return mysql_next_result(&db);
+    }
     void escape_sql(string & target){
         char *to=new char[target.size()*2+1];
         mysql_real_escape_string(&db,to,target.c_str(),target.size());
@@ -131,7 +138,7 @@ mysql_res mysql_table::s_f_wh_or(string col,string name,string where,string orde
 {
     string sql=getsql(se,col,name,where,order);
     mysql_real_query(&db,sql.c_str(),sql.size());
-    auto ret=mysql_store_result(&db);
+    auto ret=mysql_store_result(&db);next_res();
     return ret;
 }
 bool mysql_table::i_type_val(string name,string type,string val)

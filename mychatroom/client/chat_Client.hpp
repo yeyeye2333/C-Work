@@ -37,11 +37,12 @@ private:
     {
         while(true)
         {
-            sleep(20);
+            sleep(1);
             string sendhead;
             set_Head(&sendhead,Type::heart_check,0);
             char len=sendhead.size();
             std::unique_lock<std::mutex> tmp_lock(tosend.mtx);
+            std::cerr<<"发送心跳包\n";
             if(send(fd,(string(&len,sizeof(len))+sendhead).c_str(),sizeof(len)+len,0)==-1)exit(EXIT_FAILURE);
         }
     }

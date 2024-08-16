@@ -629,7 +629,7 @@ void Clannel_checked::deal()
     std::cerr<<"处理fd"<<fd<<std::endl;
     if(revent&EPOLLRDHUP)
     {
-        std::cerr<<"因为断开";
+        std::cerr<<"因为对端关闭";
         quit();
         return;
     }
