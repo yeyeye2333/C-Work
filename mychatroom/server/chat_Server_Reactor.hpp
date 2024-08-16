@@ -161,12 +161,12 @@ public:
         epoll_event ev_list[maxevents];
         int ev_num;
         std::vector<std::shared_ptr<Clannel>> tmp;
-        auto start2 = std::chrono::high_resolution_clock::now();
+        // auto start2 = std::chrono::high_resolution_clock::now();
         if((ev_num=epoll_wait(efd,ev_list,maxevents,timeout))>0)
         {
-            auto end2 = std::chrono::high_resolution_clock::now();
-            std::chrono::duration<double> duration2 = end2 - start2;
-            std::cout << "epoll_wait运行时间: " << duration2.count() << " 秒" << std::endl;
+            // auto end2 = std::chrono::high_resolution_clock::now();
+            // std::chrono::duration<double> duration2 = end2 - start2;
+            // std::cout << "epoll_wait运行时间: " << duration2.count() << " 秒" << std::endl;
             slock.lock();
             for(int c=0;c<ev_num;c++)
             {
@@ -628,6 +628,7 @@ void Clannel_checked::deal()
 {
     if(revent&EPOLLRDHUP)
     {
+        std::cerr<<"因为断开";
         quit();
         return;
     }
@@ -1198,6 +1199,7 @@ void Clannel_checked::quit()
     uid_ulock.unlock();
     reactor->reducefd(fd);
     close(fd);
+    std::cerr<<"将"<<fd<<"断开连接";
 }
 
 //Clannel_nocheck
@@ -1254,6 +1256,7 @@ void Clannel_nocheck::deal()
 {
     if(revent&EPOLLRDHUP)
     {
+        std::cerr<<"因为对端关闭";
         quit();
         return;
     }
@@ -1309,6 +1312,7 @@ void Clannel_nocheck::quit()
 {
     reactor->reducefd(fd);
     close(fd);
+    std::cerr<<"将"<<fd<<"断开连接";
 }
 
 

@@ -25,7 +25,7 @@ void Clannel_recv::_recv()
     }
     chatroom::Head _head;
     _head.ParseFromArray(tmp,len);
-    // std::cerr<<_head.DebugString();
+// std::cerr<<_head.DebugString();
     char tmp2[_head.len()];
     if(_head.len()>0)
     {
@@ -42,7 +42,8 @@ void Clannel_recv::_recv()
     chatroom::IDs _id;
     chatroom::Strs _str;
     if(_head.type()!=Type::notify_g_f&&_head.type()!=Type::notify_g_m&&_head.type()!=Type::notify_g_req
-    &&_head.type()!=Type::notify_u_f&&_head.type()!=Type::notify_u_m&&_head.type()!=Type::notify_u_req)
+    &&_head.type()!=Type::notify_u_f&&_head.type()!=Type::notify_u_m&&_head.type()!=Type::notify_u_req
+    &&_head.type()!=Type::u_message&&_head.type()!=Type::g_message)
     {
         recv_ret=_head.is();
         spr;
@@ -133,7 +134,6 @@ void Clannel_recv::_recv()
         
         case Type::u_message:
             if(_head.is()==0)std::cerr<<"操作失败/被屏蔽\n";
-            else std::cout<<"发送成功"<<std::endl;
             break;
         
         case Type::u_file:
@@ -265,7 +265,6 @@ void Clannel_recv::_recv()
         
         case Type::g_message:
             if(_head.is()==0)std::cerr<<"操作失败\n";
-            else std::cout<<"发送成功"<<std::endl;
             break;
         
         case Type::g_file:

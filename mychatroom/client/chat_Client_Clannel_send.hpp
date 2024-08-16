@@ -37,7 +37,7 @@ void Clannel_send::_send(Type type,int id1,int id2,const string&s1,const string&
             break;
 
         case Type::logout:
-            set_Login_info(&sendstr,id1,s2);
+            set_Login_info(&sendstr,id1,s1);
             realsend(sendstr,Type::logout);
             break;
 
@@ -228,7 +228,9 @@ void Clannel_send::_send(Type type,int id1,int id2,const string&s1,const string&
         default:
             break;
     }
-    std::cerr<<"等待响应...\n";
+    if(type!=Type::u_message&&type!=Type::g_message){
+        std::cerr<<"等待响应...\n";
+    }
     ulock.lock();
     cond.wait(ulock,[](){return send_continue==1;});
     ulock.unlock();

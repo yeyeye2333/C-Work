@@ -25,6 +25,10 @@ private:
     void mainUI();
     void userUI();
     void groupUI();
+
+    void u_messUI();
+    void g_messUI();
+
     void recv_work()
     {
         while(true)torecv._recv();
@@ -118,7 +122,11 @@ void Client::initial()
                     break;
                 }
                 tosend._send(Type::login,uid,0,password);
-                if(tosend.ret())mainUI();
+                if(tosend.ret())
+                {
+                    mainUI();
+                exit(EXIT_SUCCESS); //
+                }
                 break;
             
             case '2':
@@ -164,7 +172,7 @@ void Client::mainUI()
         do{
             pr;
             std::cout<<"1.查看已有好友\t2.加好友\t3.删好友\t4.查看好友申请\t5.与好友聊天\n"
-                    "6.查看已进群聊\t7.创建群聊\t8.解散群聊\t9.加群\t10.进入群聊\t(按\"q/Q\"退出)\n选择:";
+                    "6.查看已进群聊\t7.创建群聊\t8.解散群聊\t9.加群\t10.进入群聊\t(按\"q/Q\"结束客户端)\n选择:";
             do{
                 std::getline(std::cin,tmp);
                 if(!std::cin)
@@ -322,13 +330,7 @@ void Client::userUI()
                 break;
             
             case '1':
-                std::cout<<"输入消息内容(不超过1000字):"<<std::flush;
-                std::getline(std::cin,context);
-                if(!std::cin){
-                    std::cout<<std::endl;
-                    break;
-                }
-                tosend._send(Type::u_message,tosend.in_uid,0,context);
+                u_messUI();
                 break;
 
             case '2':
@@ -429,13 +431,7 @@ void Client::groupUI()
                 }
                 else
                 {
-                    std::cout<<"输入消息内容(不超过1000字):"<<std::flush;
-                    std::getline(std::cin,context);
-                    if(!std::cin){
-                    std::cout<<std::endl;
-                        break;
-                    }
-                    tosend._send(Type::g_message,tosend.uid,tosend.in_gid,context);
+                    g_messUI();
                 }
                 break;
             
@@ -453,7 +449,7 @@ void Client::groupUI()
                         }
                         tosend._send(Type::g_file,tosend.in_gid,0,name,context);
                     }else{
-                        std::cerr<<"文件类型错误\n";
+                        std::cerr<<"文件类型错误"<<std::endl;
                     }
                 }
                 catch(std::invalid_argument){std::cerr<<"错误:文件名无效\n";}
@@ -529,4 +525,30 @@ void Client::groupUI()
         }
     }while(true);
 }
+
+void Client::u_messUI(){
+    std::string context;
+    while(true){
+        std::cout<<"输入消息内容(不超过1000字,按q/Q退出):"<<std::flush;
+        std::getline(std::cin,context);
+        if((context.size()==1&&(context[0]=='q'||context[0]=='Q'))||!std::cin){
+            std::cout<<std::endl;
+            return;
+        }
+        tosend._send(Type::u_message,tosend.in_uid,0,context);
+    }
+}
+void Client::g_messUI(){
+    std::string context;
+    while(true){
+        std::cout<<"输入消息内容(不超过1000字,按q/Q退出):"<<std::flush;
+        std::getline(std::cin,context);
+        if((context.size()==1&&(context[0]=='q'||context[0]=='Q'))||!std::cin){
+            std::cout<<std::endl;
+            return;
+        }
+        tosend._send(Type::g_message,tosend.uid,tosend.in_gid,context);
+    }
+}
+
 #endif
